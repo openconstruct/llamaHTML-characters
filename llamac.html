@@ -1,0 +1,1205 @@
+--- START OF FILE llama.html ---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LlamaHTML</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="highlight-theme">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+    <style>
+        /* Basic Reset & Root Variables */
+        :root {
+            --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            --transition-speed: 0.3s ease;
+            /* Light Theme (Default) */
+            --bg-color: #f8f9fa;
+            --text-color: #212529;
+            --primary-color: #007bff;
+            --primary-color-rgb: 0, 123, 255;
+            --secondary-color: #6c757d;
+            --card-bg: #ffffff;
+            --input-bg: #ffffff;
+            --input-border: #ced4da;
+            --button-bg: #007bff;
+            --button-text: #ffffff;
+            --button-hover-bg: #0056b3;
+            --error-color: #dc3545;
+            --warning-color: #ffc107;
+            --code-bg: #e9ecef;
+            --border-color: #dee2e6;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --highlight-style-light: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
+            --highlight-style-dark: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css';
+            --highlight-bg: var(--code-bg);
+            --user-bubble-bg: #e7f5ff;
+            --model-bubble-bg: #f1f3f5;
+            --code-action-button-bg: rgba(108, 117, 125, 0.1);
+            --code-action-button-hover-bg: rgba(108, 117, 125, 0.2);
+            --code-action-button-text: var(--secondary-color);
+            --copy-button-copied-bg: #28a745;
+            --copy-button-copied-text: #ffffff;
+        }
+
+        html[data-theme='dark'] {
+            --bg-color: #1a1a1a;
+            --text-color: #e0e0e0;
+            --primary-color: #4dabf7;
+            --primary-color-rgb: 77, 171, 247;
+            --secondary-color: #a0a0a0;
+            --card-bg: #2c2c2c;
+            --input-bg: #333;
+            --input-border: #555;
+            --button-bg: #4dabf7;
+            --button-text: #111;
+            --button-hover-bg: #2196f3;
+            --error-color: #f44336;
+            --warning-color: #ffca28;
+            --code-bg: #222;
+            --border-color: #444;
+            --shadow-color: rgba(255, 255, 255, 0.1);
+            --highlight-bg: var(--code-bg);
+            --user-bubble-bg: #1c3b5e;
+            --model-bubble-bg: #383838;
+            --code-action-button-bg: rgba(160, 160, 160, 0.15);
+            --code-action-button-hover-bg: rgba(160, 160, 160, 0.3);
+            --code-action-button-text: var(--secondary-color);
+            --copy-button-copied-bg: #34c759;
+            --copy-button-copied-text: #111;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font-family); background-color: var(--bg-color); color: var(--text-color); line-height: 1.6; padding: 20px; transition: background-color var(--transition-speed), color var(--transition-speed); display: flex; flex-direction: column; min-height: 100vh; }
+        .container { max-width: 900px; margin: 20px auto; padding: 30px; background-color: var(--card-bg); border-radius: 12px; box-shadow: 0 5px 15px var(--shadow-color); transition: background-color var(--transition-speed), box-shadow var(--transition-speed); flex-grow: 1; display: flex; flex-direction: column; }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; transition: border-color var(--transition-speed); }
+        h1 { color: var(--primary-color); font-size: 1.8em; transition: color var(--transition-speed); }
+        h2 {
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 1.4em;
+            color: var(--text-color);
+            padding-bottom: 5px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .theme-switcher {
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            padding: 3px 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-color);
+            background-color: transparent;
+            transition: color var(--transition-speed), border-color var(--transition-speed), background-color var(--transition-speed);
+            user-select: none;
+        }
+        .theme-switcher:hover {
+            background-color: var(--code-bg);
+            border-color: var(--secondary-color);
+        }
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--secondary-color); transition: color var(--transition-speed); }
+        .input-group input[type="text"], .input-group input[type="password"], .input-group input[type="number"], .input-group input[type="url"], .input-group textarea, .input-group select, .input-group input[type="file"] { width: 100%; padding: 12px 15px; border: 1px solid var(--input-border); border-radius: 6px; font-size: 1rem; background-color: var(--input-bg); color: var(--text-color); transition: border-color var(--transition-speed), background-color var(--transition-speed), color var(--transition-speed); }
+        .input-group input:focus, .input-group textarea:focus, .input-group select:focus, .input-group input[type="file"]:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.25); }
+        /* Style file input slightly differently */
+        .input-group input[type="file"] { padding: 8px; }
+        textarea { resize: vertical; min-height: 120px; }
+        .button-group { display: flex; gap: 10px; margin-top: 20px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+        button { padding: 12px 20px; background-color: var(--button-bg); color: var(--button-text); border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 600; transition: background-color var(--transition-speed), transform 0.1s ease; }
+        button:hover:not(:disabled) { background-color: var(--button-hover-bg); transform: translateY(-1px); }
+        button:active:not(:disabled) { transform: translateY(0px); }
+        button:disabled { background-color: var(--secondary-color); cursor: not-allowed; opacity: 0.7; }
+        #clearButton, #clearCharacterCardButton /* Apply secondary style to clear buttons */ { background-color: var(--secondary-color); }
+        #clearButton:hover:not(:disabled), #clearCharacterCardButton:hover:not(:disabled) { background-color: #5a6268; }
+
+
+        #status { margin: 20px 0; font-weight: bold; min-height: 1.6em; display: flex; align-items: center; gap: 10px; transition: color var(--transition-speed); }
+        #status.error { color: var(--error-color); }
+        #status.warning { color: var(--warning-color); }
+        .loader { border: 4px solid var(--input-border); border-top: 4px solid var(--primary-color); border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-right: 8px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* --- Chat History Area --- */
+        .response-area {
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 20px;
+            margin-top: 10px;
+            overflow-y: auto;
+            flex-grow: 1;
+            min-height: 200px;
+            transition: background-color var(--transition-speed), border-color var(--transition-speed);
+            display: flex;
+            flex-direction: column;
+        }
+        #chatContainer {
+            width: 100%;
+            word-wrap: break-word;
+            font-size: 0.95em;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .chat-placeholder {
+            color: var(--secondary-color);
+            text-align: center;
+            margin: auto;
+            font-style: italic;
+        }
+
+        /* --- Chat Bubbles --- */
+        .chat-bubble {
+            padding: 10px 15px;
+            border-radius: 15px;
+            max-width: 85%;
+            word-wrap: break-word;
+            position: relative;
+            box-shadow: 0 1px 2px var(--shadow-color);
+            transition: background-color var(--transition-speed), color var(--transition-speed);
+            line-height: 1.5;
+        }
+        .user-bubble {
+            background-color: var(--user-bubble-bg);
+            color: var(--text-color);
+            border-bottom-right-radius: 5px;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+        .model-bubble {
+            background-color: var(--model-bubble-bg);
+            color: var(--text-color);
+            border-bottom-left-radius: 5px;
+            align-self: flex-start;
+            margin-right: auto;
+        }
+        .chat-bubble :first-child { margin-top: 0; }
+        .chat-bubble :last-child { margin-bottom: 0; }
+
+        /* Markdown Styles within Bubbles */
+        .model-bubble h1, .model-bubble h2, .model-bubble h3 { margin-top: 0.8em; margin-bottom: 0.4em; font-weight: 600; border-bottom: 1px solid var(--border-color); padding-bottom: 0.2em; transition: border-color var(--transition-speed); }
+        .model-bubble h1 { font-size: 1.3em; } .model-bubble h2 { font-size: 1.15em; } .model-bubble h3 { font-size: 1.05em; }
+        .model-bubble p { margin-bottom: 0.8em; }
+        .model-bubble ul, .model-bubble ol { margin-left: 20px; margin-bottom: 0.8em; }
+        .model-bubble li { margin-bottom: 0.3em; }
+        .model-bubble blockquote { border-left: 3px solid var(--primary-color); padding-left: 12px; margin: 0.8em 0; color: var(--secondary-color); font-style: italic; transition: border-color var(--transition-speed), color var(--transition-speed); }
+        .model-bubble code:not(pre code) { background-color: var(--code-bg); color: var(--text-color); padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.85em; transition: background-color var(--transition-speed), color var(--transition-speed); }
+        .model-bubble pre {
+            background-color: var(--highlight-bg);
+            padding: 10px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 0.8em 0;
+            transition: background-color var(--transition-speed);
+            position: relative;
+            padding-top: 35px; /* More Space for buttons */
+        }
+        .model-bubble pre code { background-color: transparent; padding: 0; font-family: 'Courier New', Courier, monospace; font-size: 0.85em; color: inherit; white-space: pre; }
+
+        /* --- Code Block Action Buttons (Copy/Download) --- */
+        .code-actions {
+             position: absolute;
+             top: 5px;
+             right: 5px;
+             display: flex;
+             gap: 5px;
+             z-index: 1;
+        }
+        .code-action-button {
+            padding: 3px 6px;
+            font-size: 0.75em;
+            background-color: var(--code-action-button-bg);
+            color: var(--code-action-button-text);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: opacity 0.2s ease, background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+        }
+        .model-bubble pre:hover .code-action-button { opacity: 1; }
+        .code-action-button:hover { background-color: var(--code-action-button-hover-bg); }
+        .copy-code-button.copied {
+             background-color: var(--copy-button-copied-bg);
+             color: var(--copy-button-copied-text);
+             opacity: 1;
+             border-color: transparent; /* Hide border when copied */
+        }
+
+        /* --- Config & Footer --- */
+        .server-url-options { display: flex; align-items: center; gap: 10px; margin-top: 5px; font-size: 0.9em; color: var(--secondary-color); }
+        .server-url-options input[type="checkbox"] { margin-right: 5px; }
+        .config-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; padding: 15px; border: 1px dashed var(--border-color); border-radius: 6px; transition: border-color var(--transition-speed); }
+        .config-options .input-group { margin-bottom: 0; }
+        details summary { cursor: pointer; color: var(--primary-color); margin-bottom: 15px; font-weight: 500; transition: color var(--transition-speed); }
+        footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid var(--border-color); color: var(--secondary-color); font-size: 0.9em; transition: border-color var(--transition-speed), color var(--transition-speed); }
+        footer a { color: var(--primary-color); text-decoration: none; transition: color var(--transition-speed); }
+        footer a:hover { text-decoration: underline; }
+
+        /* --- Input Area --- */
+        .input-area { margin-top: 10px; }
+        .input-area .input-group { margin-bottom: 10px; }
+        .input-area .button-group { margin-top: 0; margin-bottom: 10px; }
+
+        /* --- Character Card Section --- */
+        .character-card-section {
+            padding: 15px;
+            border: 1px dashed var(--border-color);
+            border-radius: 6px;
+            margin-bottom: 20px; /* Spacing below card section */
+            transition: border-color var(--transition-speed);
+        }
+        .character-card-section .input-group { margin-bottom: 10px; } /* Less bottom margin within card section */
+        #currentCharacterDisplay {
+            margin-top: 10px;
+            margin-bottom: 15px;
+            font-style: italic;
+            color: var(--secondary-color);
+            transition: color var(--transition-speed);
+        }
+        #clearCharacterCardButton {
+            margin-bottom: 0; /* Removed default bottom margin */
+            margin-top: 5px; /* Add some space above */
+            padding: 8px 15px; /* Slightly smaller button */
+            font-size: 0.9rem;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>LlamaHTML</h1>
+            <div class="theme-switcher" id="themeSwitcher" title="Switch to Dark Mode">Dark</div>
+        </header>
+
+        <div class="input-group">
+            <label for="serverUrl">Llama Server URL:</label>
+            <input type="url" id="serverUrl" placeholder="e.g., http://127.0.0.1:8080" value="http://127.0.0.1:8080">
+             <div class="server-url-options">
+                 <input type="checkbox" id="rememberServerUrl">
+                 <label for="rememberServerUrl">Remember URL (Uses Local Storage)</label>
+            </div>
+             <small style="display: block; margin-top: 5px; color: var(--secondary-color);">
+                Ensure your llama.cpp server is running (with `--host 0.0.0.0` if needed for external access) and accessible. Needs `/completion` endpoint.
+             </small>
+        </div>
+
+        <details>
+            <summary>Configuration Options</summary>
+            <div class="config-options">
+                <div class="input-group">
+                    <label for="temperature">Temperature (0-~2):</label>
+                    <input type="number" id="temperature" min="0" max="2" step="0.1" value="0.7" title="Controls randomness. Higher values make output more random.">
+                </div>
+                <div class="input-group">
+                    <label for="nPredict">Max Predict Tokens (n_predict):</label>
+                    <input type="number" id="nPredict" min="1" step="1" value="2048" title="Maximum number of tokens to generate in the response. -1 for infinite.">
+                </div>
+                 <div class="input-group">
+                    <label for="topP">Top P (0-1):</label>
+                    <input type="number" id="topP" min="0" max="1" step="0.01" value="0.95" title="Nucleus sampling parameter. Considers tokens with probability mass adding up to top_p.">
+                </div>
+                 <div class="input-group">
+                    <label for="topK">Top K (integer):</label>
+                    <input type="number" id="topK" min="1" step="1" value="40" title="Top-k sampling parameter. Considers the top k most likely tokens.">
+                </div>
+                <div class="input-group">
+                    <label for="stopSequences">Stop Sequences (comma-sep):</label>
+                    <input type="text" id="stopSequences" value="USER:, \nUSER:, <|user|>" title="Comma-separated strings to stop generation.">
+                </div>
+            </div>
+        </details>
+
+        <!-- === START: Character Card Section === -->
+        <h2>Character Card</h2>
+        <div class="character-card-section">
+            <div class="input-group">
+                <label for="characterCardFile">Load Character Card (JSON):</label>
+                <input type="file" id="characterCardFile" accept=".json,application/json">
+                 <small style="display: block; margin-top: 5px; color: var(--secondary-color);">
+                    Select a JSON file defining the character (name, description, etc.). Required fields: name, description. Optional: age, gender, disposition.
+                 </small>
+            </div>
+             <div id="currentCharacterDisplay">Current Character: None</div>
+            <button id="clearCharacterCardButton">Clear Current Character</button>
+        </div>
+        <!-- === END: Character Card Section === -->
+
+        <h2>Conversation History</h2>
+        <div class="response-area" id="responseArea">
+            <div id="chatContainer">
+                <div class="chat-placeholder">Conversation will appear here...</div>
+            </div>
+        </div>
+
+        <div id="status"></div>
+
+
+        <div class="input-area">
+            <div class="input-group">
+                <label for="prompt">Your Message (Ctrl+Enter to send):</label>
+                <textarea id="prompt" rows="4" placeholder="Enter your message here..."></textarea>
+            </div>
+
+            <div class="button-group">
+                <button id="sendButton">Send</button>
+                <button id="clearButton">Clear Chat</button>
+            </div>
+        </div>
+
+    </div>
+
+     <footer>
+        Powered by a local <a href="https://github.com/ggerganov/llama.cpp/tree/master/examples/server" target="_blank" rel="noopener noreferrer">llama.cpp server</a>. Model determined by server configuration.
+     </footer>
+
+    <script>
+        // --- DOM Elements ---
+        const serverUrlInput = document.getElementById('serverUrl');
+        const rememberServerUrlCheckbox = document.getElementById('rememberServerUrl');
+        const promptInput = document.getElementById('prompt');
+        const sendButton = document.getElementById('sendButton');
+        const clearButton = document.getElementById('clearButton');
+        const statusDiv = document.getElementById('status');
+        const chatContainer = document.getElementById('chatContainer');
+        const responseArea = document.getElementById('responseArea');
+        const themeSwitcher = document.getElementById('themeSwitcher');
+        const temperatureInput = document.getElementById('temperature');
+        const nPredictInput = document.getElementById('nPredict');
+        const topPInput = document.getElementById('topP');
+        const topKInput = document.getElementById('topK');
+        const stopSequencesInput = document.getElementById('stopSequences');
+        const highlightThemeLink = document.getElementById('highlight-theme');
+        // NEW: Character Card Elements
+        const characterCardFileInput = document.getElementById('characterCardFile');
+        const currentCharacterDisplay = document.getElementById('currentCharacterDisplay');
+        const clearCharacterCardButton = document.getElementById('clearCharacterCardButton');
+
+
+        // --- State ---
+        let chatHistory = []; // Stores messages as { role: 'user'/'model', content: '...', id: 'msg-...' }
+        let serverAvailable = false;
+        let messageCounter = 0; // For unique message IDs
+        let currentAbortController = null; // To allow cancelling fetches
+        let currentCharacterCard = null; // NEW: Holds loaded character data { name, age?, gender?, disposition?, description }
+
+        // --- Debounce Helper ---
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // --- Initialization ---
+        function initialize() {
+            loadServerUrl();
+            setupEventListeners();
+            initializeTheme();
+            configureMarked();
+            checkServerStatus(); // Initial check
+            renderChatHistory();
+            updateSendButtonState(); // Set initial state based on URL
+            updateCharacterDisplay(); // NEW: Initial character display
+        }
+
+        function configureMarked() {
+             marked.setOptions({
+                highlight: function(code, lang) {
+                    const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+                    try {
+                        const result = hljs.highlight(code, { language, ignoreIllegals: true });
+                        return result.value;
+                    } catch (e) {
+                        console.warn("Highlight.js error:", e, "- Using auto-detection fallback. Lang:", lang);
+                        try {
+                           const result = hljs.highlightAuto(code);
+                           return result.value;
+                       } catch (e2) {
+                            console.error("Highlight.js auto-detection failed:", e2);
+                            return escapeHtml(code); // Basic escaping fallback
+                       }
+                    }
+                },
+                gfm: true,
+                breaks: true,
+            });
+        }
+
+        // --- Event Listeners ---
+        function setupEventListeners() {
+            sendButton.addEventListener('click', handleSendPrompt);
+            clearButton.addEventListener('click', clearAll);
+            themeSwitcher.addEventListener('click', toggleTheme);
+            rememberServerUrlCheckbox.addEventListener('change', handleRememberUrlChange);
+            serverUrlInput.addEventListener('input', handleServerUrlInput);
+            promptInput.addEventListener('keydown', (event) => {
+                if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+                    event.preventDefault();
+                    if (!sendButton.disabled) {
+                        handleSendPrompt();
+                    }
+                }
+            });
+
+            // NEW: Character Card Listeners
+            characterCardFileInput.addEventListener('change', handleCharacterFileLoad);
+            clearCharacterCardButton.addEventListener('click', clearCharacterCard);
+
+            // Delegate clicks for code block actions
+            chatContainer.addEventListener('click', function(event) {
+                if (event.target.classList.contains('copy-code-button')) {
+                    handleCopyCodeClick(event.target);
+                } else if (event.target.classList.contains('download-code-button')) {
+                    handleDownloadCodeClick(event.target);
+                }
+            });
+        }
+
+        // --- Server URL Handling ---
+        function loadServerUrl() {
+            const rememberedUrl = localStorage.getItem('llamaServerUrl');
+            const shouldRemember = localStorage.getItem('rememberLlamaServerUrl') === 'true';
+            rememberServerUrlCheckbox.checked = shouldRemember;
+            if (shouldRemember && rememberedUrl) {
+                serverUrlInput.value = rememberedUrl;
+                console.info("Server URL loaded from Local Storage.");
+            }
+        }
+
+        function handleRememberUrlChange() {
+            const url = serverUrlInput.value.trim();
+            if (rememberServerUrlCheckbox.checked) {
+                if (url) {
+                    localStorage.setItem('llamaServerUrl', url);
+                    localStorage.setItem('rememberLlamaServerUrl', 'true');
+                    console.info("Server URL saved to Local Storage.");
+                } else {
+                    rememberServerUrlCheckbox.checked = false; // Don't save empty
+                    localStorage.removeItem('llamaServerUrl');
+                    localStorage.removeItem('rememberLlamaServerUrl');
+                }
+            } else {
+                localStorage.removeItem('llamaServerUrl');
+                localStorage.removeItem('rememberLlamaServerUrl');
+                console.info("Server URL removed from Local Storage.");
+            }
+        }
+
+        let serverUrlDebounceTimer;
+        function handleServerUrlInput() {
+             handleRememberUrlChange(); // Update storage immediately if checked
+             clearTimeout(serverUrlDebounceTimer);
+             serverUrlDebounceTimer = setTimeout(() => {
+                 checkServerStatus();
+                 updateSendButtonState();
+             }, 500); // Debounce check
+         }
+
+         async function checkServerStatus() {
+            const serverUrl = serverUrlInput.value.trim();
+            if (!isValidHttpUrl(serverUrl)) {
+                showStatus("Invalid server URL format.", true);
+                serverAvailable = false;
+                updateSendButtonState();
+                return;
+            }
+            // Minimal check: assume OK if URL is valid, rely on API call for real check
+            showStatus("Server URL looks valid. Ready to send.", false);
+            serverAvailable = true;
+            updateSendButtonState();
+        }
+
+        function updateSendButtonState() {
+            const urlValid = isValidHttpUrl(serverUrlInput.value.trim());
+            const isLoading = statusDiv.querySelector('.loader') !== null;
+            sendButton.disabled = !urlValid || isLoading; // Disable if loading or URL invalid
+        }
+
+        function isValidHttpUrl(string) {
+            let url;
+            try {
+                url = new URL(string);
+            } catch (_) {
+                return false;
+            }
+            return url.protocol === "http:" || url.protocol === "https:";
+        }
+
+        // --- Theme Handling ---
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            setTheme(savedTheme);
+        }
+        function setTheme(theme) {
+            const html = document.documentElement;
+            html.setAttribute('data-theme', theme);
+            themeSwitcher.textContent = theme === 'dark' ? 'Light' : 'Dark';
+            themeSwitcher.title = theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+            const lightThemeUrl = getComputedStyle(html).getPropertyValue('--highlight-style-light').trim().replace(/['"]/g,'');
+            const darkThemeUrl = getComputedStyle(html).getPropertyValue('--highlight-style-dark').trim().replace(/['"]/g,'');
+            highlightThemeLink.href = theme === 'dark' ? darkThemeUrl : lightThemeUrl;
+            localStorage.setItem('theme', theme);
+        }
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            setTheme(newTheme);
+        }
+        // --- End Theme Handling ---
+
+        // --- NEW: Character Card Functions ---
+        function handleCharacterFileLoad(event) {
+            const file = event.target.files[0];
+            if (!file) {
+                return; // No file selected
+            }
+
+            if (file.type !== 'application/json' && !file.name.toLowerCase().endsWith('.json')) {
+                showStatus("Error: Please select a valid JSON file (.json) for the character card.", true);
+                event.target.value = null; // Clear the input
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const cardData = JSON.parse(e.target.result);
+
+                    // Basic Validation (ensure essential fields exist)
+                    if (!cardData.name || !cardData.description) {
+                        throw new Error("Character card JSON must include at least 'name' and 'description' fields.");
+                    }
+
+                    // Validate field types (simple check) - provide warnings
+                    if (typeof cardData.name !== 'string') console.warn("Character card field 'name' should be a string.");
+                    if (cardData.age && typeof cardData.age !== 'string' && typeof cardData.age !== 'number') console.warn("Character card field 'age' should be a string or number.");
+                    if (cardData.gender && typeof cardData.gender !== 'string') console.warn("Character card field 'gender' should be a string.");
+                    if (cardData.disposition && typeof cardData.disposition !== 'string') console.warn("Character card field 'disposition' should be a string.");
+                    if (typeof cardData.description !== 'string') console.warn("Character card field 'description' should be a string.");
+
+
+                    currentCharacterCard = cardData;
+                    console.log("Character Card Loaded:", currentCharacterCard);
+                    updateCharacterDisplay();
+                    showStatus(`Character Card "${currentCharacterCard.name}" loaded successfully.`, false);
+
+                } catch (error) {
+                    console.error("Error loading or parsing character card:", error);
+                    showStatus(`Error loading character card: ${error.message}`, true);
+                    currentCharacterCard = null; // Ensure it's cleared on error
+                    updateCharacterDisplay();
+                } finally {
+                    event.target.value = null; // Clear the input value to allow re-loading the same file
+                }
+            };
+            reader.onerror = (e) => {
+                console.error("Error reading character card file:", e);
+                showStatus("Error reading character card file.", true);
+                currentCharacterCard = null;
+                updateCharacterDisplay();
+                event.target.value = null;
+            };
+            reader.readAsText(file);
+        }
+
+        function clearCharacterCard() {
+            if (currentCharacterCard) {
+                const previousName = currentCharacterCard.name;
+                currentCharacterCard = null;
+                updateCharacterDisplay();
+                showStatus(`Character Card "${previousName}" cleared.`, false);
+                console.log("Character Card cleared.");
+            } else {
+                showStatus("No character card is currently loaded.", false);
+            }
+            characterCardFileInput.value = null; // Also clear the file input visually
+        }
+
+        function updateCharacterDisplay() {
+            if (currentCharacterCard && currentCharacterCard.name) {
+                currentCharacterDisplay.textContent = `Current Character: ${escapeHtml(currentCharacterCard.name)}`;
+                currentCharacterDisplay.style.fontWeight = 'bold';
+                currentCharacterDisplay.style.color = 'var(--primary-color)'; // Make it stand out slightly
+            } else {
+                currentCharacterDisplay.textContent = `Current Character: None`;
+                 currentCharacterDisplay.style.fontWeight = 'normal';
+                 currentCharacterDisplay.style.color = 'var(--secondary-color)'; // Reset style
+            }
+        }
+        // --- End Character Card Functions ---
+
+
+        // --- Main API Call Logic (Streaming) ---
+        async function handleSendPrompt() {
+            const serverUrl = serverUrlInput.value.trim();
+            const promptText = promptInput.value.trim();
+            const temperature = parseFloat(temperatureInput.value);
+            const nPredict = parseInt(nPredictInput.value, 10);
+            const topP = parseFloat(topPInput.value);
+            const topK = parseInt(topKInput.value, 10);
+            const stopSequences = stopSequencesInput.value.split(',')
+                                      .map(s => s.trim())
+                                      .filter(s => s.length > 0);
+
+            // Validation
+            if (!isValidHttpUrl(serverUrl)) { showStatus("Error: Invalid or missing server URL.", true); serverUrlInput.focus(); return; }
+            if (!promptText) { showStatus("Error: Message cannot be empty.", true); promptInput.focus(); return; }
+
+            // Cancel previous request if running
+            if (currentAbortController) {
+                currentAbortController.abort();
+                console.log("Previous request aborted.");
+            }
+            currentAbortController = new AbortController();
+            const signal = currentAbortController.signal;
+
+            // Add user message
+            const userMessageId = `msg-${messageCounter++}`;
+            const userMessage = { role: 'user', content: promptText, id: userMessageId };
+            chatHistory.push(userMessage);
+            renderChatHistory(); // Render user message immediately
+            scrollToBottom();
+            promptInput.value = '';
+            showLoading(true, "Connecting...");
+
+            // Prepare model message structure (will be filled by stream)
+            const modelMessageId = `msg-${messageCounter++}`;
+            const modelMessage = { role: 'model', content: '', id: modelMessageId };
+            chatHistory.push(modelMessage);
+            const modelBubble = createChatBubbleElement(modelMessage); // Create bubble shell
+            chatContainer.appendChild(modelBubble);
+            updateChatPlaceholder(); // Remove placeholder if needed
+            scrollToBottom(); // Scroll to include the new empty bubble
+
+            // Prepare API request body
+            // --->>> MODIFICATION: Uses updated formatChatHistoryForLlama <<<---
+            const fullPrompt = formatChatHistoryForLlama(chatHistory.slice(0, -1)); // Exclude the empty model message
+            const apiUrl = `${serverUrl}/completion`;
+            const requestBody = {
+                prompt: fullPrompt,
+                temperature: temperature,
+                n_predict: nPredict === -1 ? -1 : Math.max(1, nPredict),
+                top_p: topP,
+                top_k: topK,
+                stop: stopSequences,
+                stream: true // <<<<<<----- ENABLE STREAMING
+                // Consider adding 'cache_prompt': true for performance on repeated prompts
+                // 'system_prompt': // Might be useful if server explicitly supports it, but we inject manually for broader compatibility
+            };
+
+            console.log("Sending API Request to:", apiUrl);
+            console.log("Request Body:", JSON.stringify(requestBody, null, 2));
+
+            // Debounced function for rendering markdown/highlighting during stream
+            const debouncedRender = debounce(() => {
+                updateModelBubbleContent(modelMessageId, modelMessage.content, false); // Re-render with current content
+                scrollToBottom(); // Keep scrolling as content expands
+            }, 250); // Adjust debounce time as needed
+
+            let responseOk = false; // Track if we received a valid response status
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody),
+                    signal: signal, // Pass the abort signal
+                });
+
+                responseOk = response.ok; // Store initial status
+
+                if (!response.ok || !response.body) {
+                    let errorText = `API Error: ${response.status} ${response.statusText}`;
+                     try {
+                         const errorData = await response.json(); // Try reading error body if possible
+                         console.error("API Error Response Body:", errorData);
+                         if (errorData?.content) errorText += ` - ${errorData.content}`;
+                         else if (errorData?.error) errorText += ` - ${errorData.error}`;
+                         else { const textResponse = await response.text(); errorText += ` - Server Response: ${textResponse.substring(0, 300)}${textResponse.length > 300 ? '...' : ''}`; }
+                     } catch (e) { /* ignore if reading body fails */ }
+                     throw new Error(errorText);
+                }
+
+                showLoading(true, "Receiving response..."); // Update status
+                serverAvailable = true; // Got a connection
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+                let finalData = null; // To store the last JSON message with stats
+
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) {
+                        console.log("Stream finished.");
+                        break;
+                    }
+
+                    buffer += decoder.decode(value, { stream: true });
+                    // Process buffer line by line for SSE messages (data: {...}\n\n)
+                    let lines = buffer.split('\n\n');
+                    buffer = lines.pop(); // Keep the last (potentially incomplete) message in buffer
+
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            const jsonData = line.substring(6).trim();
+                            if (jsonData) {
+                                try {
+                                    const data = JSON.parse(jsonData);
+                                    // console.log("Stream Data Chunk:", data); // DEBUG
+
+                                    if (typeof data.content === 'string') {
+                                        modelMessage.content += data.content;
+                                        // Update bubble content directly (more efficient than full re-render)
+                                        updateModelBubbleContent(modelMessageId, modelMessage.content, true); // Append raw text first
+                                        debouncedRender(); // Schedule a debounced re-render/highlight
+                                    }
+
+                                    if (data.stop === true) {
+                                        console.log("Stop signal received in stream:", data);
+                                        finalData = data; // Store final stats
+                                        // Ensure buffer is flushed if stream ends without \n\n
+                                        buffer += decoder.decode(undefined, { stream: false });
+                                         if (buffer.startsWith('data: ')) {
+                                             const lastJsonData = buffer.substring(6).trim();
+                                             if(lastJsonData) {
+                                                  try {
+                                                     const lastData = JSON.parse(lastJsonData);
+                                                      if (lastData.stop === true) finalData = lastData;
+                                                  } catch(e) { console.error("Error parsing final buffer chunk:", e); }
+                                             }
+                                         }
+                                        buffer = ''; // Clear buffer
+                                        // Do NOT break here, let reader.read() return done:true
+                                    }
+                                } catch (e) {
+                                    console.error("Error parsing stream JSON:", e, "Data:", jsonData);
+                                }
+                            }
+                        }
+                    }
+                } // end while(true)
+
+                // Final render after stream completes
+                updateModelBubbleContent(modelMessageId, modelMessage.content, false); // Final full render
+                scrollToBottom();
+
+                // Update status based on final stream data
+                let statusMessage = "Response complete.";
+                if (finalData) {
+                    if(finalData.timings) {
+                         statusMessage += ` Time: ${((finalData.timings.prompt_ms + finalData.timings.predicted_ms)/1000).toFixed(2)}s.`
+                    }
+                    if (finalData.stopped_eos) statusMessage += ` (Stopped: EOS)`;
+                    if (finalData.stopped_word) statusMessage += ` (Stopped: Word)`;
+                    if (finalData.stopped_limit) statusMessage += ` (Stopped: Limit)`;
+                }
+                showStatus(statusMessage, false, finalData?.stopped_limit);
+
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                   showStatus("Request cancelled by user.", false);
+                   // Remove the partially added user/model message pair for the aborted request
+                   if (chatHistory.length >= 2 && chatHistory[chatHistory.length - 2].id === userMessageId) {
+                       chatHistory.pop(); // Remove model placeholder
+                       chatHistory.pop(); // Remove user message
+                   }
+                   renderChatHistory(); // Re-render without the aborted messages
+                   return; // Stop processing
+                }
+
+                console.error("API Call Failed:", error);
+                let displayError = error.message || 'An unknown error occurred.';
+                if (!responseOk && (displayError.includes('Failed to fetch') || displayError.includes('NetworkError') || displayError.includes('ERR_CONNECTION_REFUSED'))) {
+                     displayError = `Connection Error: Could not connect to server at ${serverUrl}. Is it running?`;
+                     serverAvailable = false;
+                }
+
+                // Remove the failed user message and the empty model bubble
+                const userMsgIndex = chatHistory.findIndex(m => m.id === userMessageId);
+                if (userMsgIndex !== -1) {
+                    chatHistory.splice(userMsgIndex, 2); // Remove user and model message
+                }
+                renderChatHistory(); // Re-render to remove the failed attempt bubbles
+                showStatus(`Error: ${displayError}`, true);
+
+            } finally {
+                showLoading(false);
+                promptInput.disabled = false; // Re-enable prompt input
+                updateSendButtonState(); // Re-enable send button if URL still valid
+                currentAbortController = null; // Clear the controller
+                promptInput.focus();
+            }
+        }
+
+        // --- Prompt Formatting ---
+        // --->>> MODIFIED FUNCTION <<<---
+        function formatChatHistoryForLlama(history) {
+            let formattedPrompt = "";
+
+            // NEW: Prepend Character Card instructions if loaded
+            if (currentCharacterCard) {
+                // Construct the persona string safely using escapeHtml for content fields
+                let persona = `You are ${escapeHtml(currentCharacterCard.name)}. `;
+                if (currentCharacterCard.age) persona += `Age: ${escapeHtml(String(currentCharacterCard.age))}. `; // Ensure age is string
+                if (currentCharacterCard.gender) persona += `Gender: ${escapeHtml(currentCharacterCard.gender)}. `;
+                if (currentCharacterCard.disposition) persona += `Disposition: ${escapeHtml(currentCharacterCard.disposition)}. `;
+                persona += `Description: ${escapeHtml(currentCharacterCard.description)}\n`;
+                persona += `You must respond and act consistently as ${escapeHtml(currentCharacterCard.name)}, based on this description. Do not break character. Maintain this persona throughout the conversation.\n\n`;
+
+                // This instruction block is sometimes helpful for models to understand the setup
+                formattedPrompt += `SYSTEM: ${persona}`;
+
+                // Start the conversation in the character's voice immediately if no history
+                // Or frame the history with User/Character interaction
+                console.log("Using Character Persona Prompt:\n", persona);
+            } else {
+                 console.log("No Character Card loaded, using default prompt format.");
+                 // Optional: Add a default system prompt if needed when no character is loaded
+                 // formattedPrompt += "SYSTEM: You are a helpful AI assistant.\n\n";
+            }
+
+            // Append actual chat history, adapting prefixes
+            history.forEach(message => {
+                 if (message.role === 'user') {
+                     // Use a standard instruction format prefix
+                     formattedPrompt += `USER: ${message.content}\n`; // Keep USER prefix standard
+                 } else if (message.role === 'model') {
+                     // Use character name if set, otherwise ASSISTANT
+                     const prefix = currentCharacterCard ? `${escapeHtml(currentCharacterCard.name)}:` : `ASSISTANT:`;
+                     formattedPrompt += `${prefix} ${message.content}\n`;
+                 }
+             });
+
+
+            // Prompt for the next turn, using the character's name or ASSISTANT
+            const finalAssistantPrefix = currentCharacterCard ? `${escapeHtml(currentCharacterCard.name)}:` : `ASSISTANT:`;
+            formattedPrompt += finalAssistantPrefix; // Ready for the model's response
+
+            return formattedPrompt;
+        }
+
+        // --- UI Update Functions ---
+        function showLoading(isLoading, message = "Processing request...") {
+             const currentStatusText = statusDiv.querySelector('span')?.textContent || '';
+             const isError = statusDiv.classList.contains('error');
+             const isWarning = statusDiv.classList.contains('warning');
+             const loaderElement = statusDiv.querySelector('.loader');
+
+             if (isLoading) {
+                 if (!loaderElement) {
+                    statusDiv.innerHTML = `<div class="loader"></div><span>${escapeHtml(message)}</span>`;
+                    if (isError) statusDiv.classList.add('error');
+                    if (isWarning) statusDiv.classList.add('warning');
+                 } else {
+                    const statusSpan = statusDiv.querySelector('span');
+                    if(statusSpan) statusSpan.textContent = escapeHtml(message);
+                 }
+                 sendButton.disabled = true;
+                 promptInput.disabled = true; // Disable prompt while loading
+             } else {
+                 if (loaderElement) loaderElement.remove();
+                 const statusSpan = statusDiv.querySelector('span');
+                 // Clear status only if it was a loading message, otherwise keep error/warning/completion messages
+                 if (statusSpan && /Processing|Connecting|Receiving/.test(statusSpan.textContent)) {
+                     statusDiv.innerHTML = ''; // Clear loading message
+                 }
+                 promptInput.disabled = false; // Re-enable prompt input
+                 updateSendButtonState();
+             }
+         }
+
+        function showStatus(message, isError = false, isWarning = false) {
+             const loaderElement = statusDiv.querySelector('.loader');
+             const loaderHtml = loaderElement ? loaderElement.outerHTML : ''; // Preserve loader if still loading
+             statusDiv.classList.remove('error', 'warning');
+             statusDiv.innerHTML = `${loaderHtml}<span>${escapeHtml(message)}</span>`;
+             if (isError) statusDiv.classList.add('error');
+             else if (isWarning) statusDiv.classList.add('warning');
+         }
+
+        // Function to create a chat bubble DOM element
+        function createChatBubbleElement(message) {
+            const bubble = document.createElement('div');
+            bubble.classList.add('chat-bubble');
+            bubble.dataset.messageId = message.id; // Link bubble to message ID
+
+            if (message.role === 'user') {
+                bubble.classList.add('user-bubble');
+                // Use textContent for user input to prevent accidental HTML injection if needed
+                bubble.textContent = message.content;
+            } else if (message.role === 'model') {
+                bubble.classList.add('model-bubble');
+                // Initial content might be empty for streaming
+                bubble.innerHTML = message.content ? marked.parse(message.content) : '';
+                if (message.content) {
+                     // Add code actions after initial render if content exists
+                     requestAnimationFrame(() => addCodeActionsToBubble(bubble));
+                }
+            }
+            return bubble;
+        }
+
+        // Renders the full chat history from the `chatHistory` array
+        function renderChatHistory() {
+            chatContainer.innerHTML = ''; // Clear existing content
+            if (chatHistory.length === 0) {
+                 updateChatPlaceholder();
+                return;
+            }
+
+            chatHistory.forEach(message => {
+                 if (!message || !message.role || typeof message.content !== 'string') {
+                     console.warn("Skipping rendering invalid message:", message);
+                     return;
+                 }
+                 const bubble = createChatBubbleElement(message);
+                 chatContainer.appendChild(bubble);
+             });
+             updateChatPlaceholder();
+         }
+
+         // Updates the content of a specific model chat bubble
+         function updateModelBubbleContent(messageId, newContent, isStreamingUpdate = false) {
+             const bubble = chatContainer.querySelector(`.model-bubble[data-message-id="${messageId}"]`);
+             if (!bubble) {
+                 console.error(`Bubble with ID ${messageId} not found for update.`);
+                 return;
+             }
+
+             try {
+                if (isStreamingUpdate) {
+                    // Re-parse on each chunk for better intermediate formatting display
+                    bubble.innerHTML = marked.parse(newContent);
+                    // Re-add actions immediately after parsing (might be slightly less performant but ensures buttons appear)
+                    requestAnimationFrame(() => addCodeActionsToBubble(bubble));
+
+                } else {
+                    // Full render: Parse Markdown and add buttons/highlighting
+                    bubble.innerHTML = marked.parse(newContent || "[Empty Model Response]");
+                    requestAnimationFrame(() => addCodeActionsToBubble(bubble)); // Ensure buttons/highlighting
+                }
+             } catch (e) {
+                 console.error("Markdown parsing/rendering error during update:", e);
+                 bubble.textContent = newContent || "[Error rendering response]"; // Fallback
+             }
+         }
+
+        // Helper to add Copy/Download buttons and apply highlighting
+        function addCodeActionsToBubble(bubble) {
+            const preBlocks = bubble.querySelectorAll('pre');
+            preBlocks.forEach(pre => {
+                // Clean up existing buttons first to prevent duplicates on re-render
+                const existingActions = pre.querySelector('.code-actions');
+                if (existingActions) existingActions.remove();
+
+                const codeElement = pre.querySelector('code');
+                if (!codeElement) return;
+
+                const actionsContainer = document.createElement('div');
+                actionsContainer.className = 'code-actions';
+
+                // Copy Button
+                const copyButton = document.createElement('button');
+                copyButton.textContent = 'Copy';
+                copyButton.className = 'code-action-button copy-code-button';
+                copyButton.title = 'Copy code to clipboard';
+                copyButton.setAttribute('aria-label', 'Copy code block');
+                actionsContainer.appendChild(copyButton);
+
+                // Download Button
+                const downloadButton = document.createElement('button');
+                downloadButton.textContent = 'Download';
+                downloadButton.className = 'code-action-button download-code-button';
+                downloadButton.title = 'Download code block';
+                downloadButton.setAttribute('aria-label', 'Download code block');
+                actionsContainer.appendChild(downloadButton);
+
+                // Add container to pre block
+                 if (pre.firstChild) {
+                    pre.insertBefore(actionsContainer, pre.firstChild);
+                 } else {
+                    pre.appendChild(actionsContainer);
+                 }
+
+                // Ensure highlighting is applied
+                if (!codeElement.classList.contains('hljs')) {
+                   try {
+                     hljs.highlightElement(codeElement);
+                   } catch(e) { console.warn("Highlighting failed for element", codeElement, e); }
+                } else {
+                    // Re-run if already highlighted, sometimes needed after dynamic content changes
+                     try {
+                       hljs.highlightElement(codeElement);
+                     } catch(e) { console.warn("Re-highlighting failed for element", codeElement, e); }
+                }
+            });
+        }
+
+        // Show/Hide the placeholder message
+        function updateChatPlaceholder() {
+             const placeholder = chatContainer.querySelector('.chat-placeholder');
+             if (chatHistory.length === 0 && !placeholder) {
+                 chatContainer.innerHTML = '<div class="chat-placeholder">Conversation will appear here...</div>';
+             } else if (chatHistory.length > 0 && placeholder) {
+                 placeholder.remove();
+             }
+         }
+
+
+        // --- Copy Code Logic ---
+        function handleCopyCodeClick(button) {
+             const pre = button.closest('pre');
+             const code = pre?.querySelector('code');
+             if (!code) return;
+             const codeToCopy = code.textContent || '';
+             navigator.clipboard.writeText(codeToCopy).then(() => {
+                 button.textContent = 'Copied!';
+                 button.classList.add('copied');
+                 button.disabled = true;
+                 setTimeout(() => {
+                     button.textContent = 'Copy';
+                     button.classList.remove('copied');
+                     button.disabled = false;
+                 }, 2000);
+             }).catch(err => {
+                 console.error('Failed to copy code: ', err);
+                 button.textContent = 'Error';
+                 button.disabled = true;
+                 setTimeout(() => {
+                     button.textContent = 'Copy';
+                     button.disabled = false;
+                 }, 2000);
+             });
+         }
+
+        // --- Download Code Logic ---
+        function handleDownloadCodeClick(button) {
+            const pre = button.closest('pre');
+            const code = pre?.querySelector('code');
+            if (!code) return;
+
+            const codeContent = code.textContent || '';
+            let language = 'plaintext';
+            let extension = '.txt'; // Default extension
+
+            // Try to detect language from highlight.js class
+            const langClass = Array.from(code.classList).find(cls => cls.startsWith('language-'));
+            if (langClass) {
+                language = langClass.replace('language-', '');
+            } else {
+                 // Fallback: check parent pre class if code has no specific class
+                 const preLangClass = Array.from(pre.classList).find(cls => cls.startsWith('language-'));
+                  if (preLangClass) {
+                     language = preLangClass.replace('language-', '');
+                 }
+            }
+
+            // Simple mapping for common languages
+            const extensionMap = {
+                python: '.py', javascript: '.js', js: '.js', typescript: '.ts', ts: '.ts',
+                html: '.html', css: '.css', json: '.json', xml: '.xml', yaml: '.yaml',
+                markdown: '.md', md: '.md', shell: '.sh', bash: '.sh', zsh: '.zsh',
+                java: '.java', c: '.c', cpp: '.cpp', csharp: '.cs', go: '.go', ruby: '.rb',
+                php: '.php', rust: '.rs', sql: '.sql', dockerfile: 'Dockerfile', ini: '.ini',
+                toml: '.toml', plaintext: '.txt', text: '.txt'
+                // Add more mappings as needed
+            };
+            extension = extensionMap[language.toLowerCase()] || extension;
+
+            // Determine filename
+            const filename = `code-${language}${extension}`;
+
+            // Create Blob and trigger download
+            try {
+                const blob = new Blob([codeContent], { type: 'application/octet-stream' }); // Use octet-stream for generic download
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a); // Required for Firefox
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url); // Clean up
+
+                // Optional: Visual feedback on the button
+                button.textContent = 'Downloaded';
+                button.disabled = true;
+                 setTimeout(() => {
+                    button.textContent = 'Download';
+                    button.disabled = false;
+                }, 2000);
+
+            } catch (err) {
+                console.error('Failed to create download: ', err);
+                 button.textContent = 'Error';
+                 button.disabled = true;
+                  setTimeout(() => {
+                    button.textContent = 'Download';
+                    button.disabled = false;
+                 }, 2000);
+            }
+        }
+
+
+         // --- Utility Functions ---
+         function escapeHtml(unsafe) {
+             if (typeof unsafe !== 'string') return '';
+             return unsafe
+                  .replace(/&/g, "&amp;")
+                  .replace(/</g, "&lt;")
+                  .replace(/>/g, "&gt;")
+                  .replace(/"/g, "&quot;")
+                  .replace(/'/g, "&#039;");
+         }
+
+        function scrollToBottom() {
+            requestAnimationFrame(() => {
+                // Only scroll if the user isn't currently scrolled up significantly
+                const isScrolledUp = responseArea.scrollHeight - responseArea.scrollTop - responseArea.clientHeight > 100;
+                if (!isScrolledUp) {
+                     responseArea.scrollTop = responseArea.scrollHeight;
+                }
+            });
+        }
+
+        function clearAll() {
+            if (currentAbortController) {
+                currentAbortController.abort(); // Cancel ongoing request if clearing
+                currentAbortController = null;
+            }
+            promptInput.value = '';
+            chatHistory = [];
+            // By default, keep character card when clearing chat
+            // To clear character card too, uncomment these lines:
+            // currentCharacterCard = null;
+            // updateCharacterDisplay();
+            // characterCardFileInput.value = null;
+
+            renderChatHistory();
+            showStatus(""); // Clear status
+            promptInput.disabled = false; // Ensure input is enabled
+            updateSendButtonState(); // Update button state
+            promptInput.focus();
+        }
+
+        // --- Run Initialization ---
+        initialize();
+
+    </script>
+</body>
+</html>
+
+--- END OF FILE llama.html ---

@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Character Card Creator</title>
+    <style>
+        /* Basic Reset & Root Variables (Adapted from LlamaHTML for consistency) */
+        :root {
+            --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            --transition-speed: 0.3s ease;
+            /* Simple Light Theme */
+            --bg-color: #f8f9fa;
+            --text-color: #212529;
+            --primary-color: #007bff;
+            --primary-color-rgb: 0, 123, 255;
+            --secondary-color: #6c757d;
+            --card-bg: #ffffff;
+            --input-bg: #ffffff;
+            --input-border: #ced4da;
+            --button-bg: #007bff;
+            --button-text: #ffffff;
+            --button-hover-bg: #0056b3;
+            --error-color: #dc3545;
+            --success-color: #28a745;
+            --code-bg: #e9ecef;
+            --border-color: #dee2e6;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align top */
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 700px;
+            width: 100%;
+            margin: 20px;
+            padding: 30px;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 5px 15px var(--shadow-color);
+        }
+        h1 {
+            color: var(--primary-color);
+            font-size: 1.8em;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        p.description {
+            text-align: center;
+            color: var(--secondary-color);
+            margin-bottom: 25px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr; /* Single column layout */
+            gap: 15px;
+        }
+
+        .input-group { margin-bottom: 5px; } /* Reduced margin */
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+        .input-group label .required-star { color: var(--error-color); margin-left: 2px; }
+        .input-group input[type="text"],
+        .input-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--input-border);
+            border-radius: 6px;
+            font-size: 1rem;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+        }
+        .input-group input:focus,
+        .input-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.25);
+        }
+        .input-group textarea { resize: vertical; min-height: 100px; }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+            flex-wrap: wrap; /* Allow buttons to wrap on small screens */
+        }
+        button {
+            padding: 12px 20px;
+            background-color: var(--button-bg);
+            color: var(--button-text);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color var(--transition-speed), transform 0.1s ease;
+            flex-grow: 1; /* Allow buttons to share space */
+        }
+        button:hover:not(:disabled) { background-color: var(--button-hover-bg); transform: translateY(-1px); }
+        button:active:not(:disabled) { transform: translateY(0px); }
+        button:disabled { background-color: var(--secondary-color); cursor: not-allowed; opacity: 0.7; }
+
+        #clearButton { background-color: var(--secondary-color); }
+        #clearButton:hover:not(:disabled) { background-color: #5a6268; }
+
+        #status {
+            margin-top: 20px;
+            font-weight: bold;
+            min-height: 1.6em;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        #status.error { color: var(--error-color); background-color: rgba(220, 53, 69, 0.1); }
+        #status.success { color: var(--success-color); background-color: rgba(40, 167, 69, 0.1); }
+
+        .preview-area { margin-top: 20px; }
+        .preview-area h2 {
+            font-size: 1.2em;
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 5px;
+        }
+        #jsonPreview {
+            background-color: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 15px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9em;
+            white-space: pre-wrap; /* Allow wrapping */
+            word-wrap: break-word;
+            max-height: 300px; /* Limit height */
+            overflow-y: auto; /* Add scroll if needed */
+            color: var(--text-color);
+        }
+        #jsonPreview:empty::before {
+            content: "JSON preview will appear here...";
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Character Card Creator</h1>
+        <p class="description">Fill in the details below to generate a JSON character card file compatible with LlamaHTML.</p>
+
+        <form id="characterForm">
+            <div class="form-grid">
+                <div class="input-group">
+                    <label for="charName">Name <span class="required-star">*</span></label>
+                    <input type="text" id="charName" name="charName" required placeholder="e.g., Captain Redbeard">
+                </div>
+
+                <div class="input-group">
+                    <label for="charAge">Age</label>
+                    <input type="text" id="charAge" name="charAge" placeholder="e.g., 45, Ageless, Ancient">
+                </div>
+
+                <div class="input-group">
+                    <label for="charGender">Gender</label>
+                    <input type="text" id="charGender" name="charGender" placeholder="e.g., Male, Female, Non-binary">
+                </div>
+
+                <div class="input-group">
+                    <label for="charDisposition">Disposition</label>
+                    <textarea id="charDisposition" name="charDisposition" rows="3" placeholder="Briefly describe their general mood or attitude (e.g., Gruff but fair, Cheerful and optimistic)"></textarea>
+                </div>
+
+                <div class="input-group">
+                    <label for="charDescription">Description <span class="required-star">*</span></label>
+                    <textarea id="charDescription" name="charDescription" rows="5" required placeholder="Detailed description of the character's appearance, personality, speaking style, background, goals, etc. This is the most important field for the LLM."></textarea>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button type="button" id="generateButton">Generate & Download JSON</button>
+                <button type="button" id="previewButton">Preview JSON</button>
+                <button type="button" id="clearButton">Clear Fields</button>
+            </div>
+        </form>
+
+        <div id="status"></div>
+
+        <div class="preview-area">
+            <h2>JSON Preview</h2>
+            <pre><code id="jsonPreview"></code></pre>
+        </div>
+
+    </div>
+
+    <script>
+        // Get DOM Elements
+        const form = document.getElementById('characterForm');
+        const charNameInput = document.getElementById('charName');
+        const charAgeInput = document.getElementById('charAge');
+        const charGenderInput = document.getElementById('charGender');
+        const charDispositionInput = document.getElementById('charDisposition');
+        const charDescriptionInput = document.getElementById('charDescription');
+        const generateButton = document.getElementById('generateButton');
+        const previewButton = document.getElementById('previewButton');
+        const clearButton = document.getElementById('clearButton');
+        const statusDiv = document.getElementById('status');
+        const jsonPreview = document.getElementById('jsonPreview');
+
+        // --- Helper Functions ---
+        function showStatus(message, isError = false) {
+            statusDiv.textContent = message;
+            statusDiv.className = isError ? 'error' : 'success'; // Use class for styling
+            if (!message) {
+                statusDiv.className = ''; // Clear class if no message
+                statusDiv.style.backgroundColor = 'transparent'; // Explicitly clear background if needed
+            } else {
+                 statusDiv.style.backgroundColor = isError ? 'rgba(220, 53, 69, 0.1)' : 'rgba(40, 167, 69, 0.1)';
+            }
+        }
+
+        function generateJsonData() {
+            const name = charNameInput.value.trim();
+            const description = charDescriptionInput.value.trim();
+            const age = charAgeInput.value.trim();
+            const gender = charGenderInput.value.trim();
+            const disposition = charDispositionInput.value.trim();
+
+            // Basic Validation
+            if (!name || !description) {
+                showStatus('Error: Name and Description fields are required.', true);
+                if (!name) charNameInput.focus();
+                else charDescriptionInput.focus();
+                return null; // Indicate failure
+            }
+
+            // Create character data object
+            const cardData = {
+                name: name,
+                // Only include optional fields if they have content
+                ...(age && { age: age }),
+                ...(gender && { gender: gender }),
+                ...(disposition && { disposition: disposition }),
+                description: description,
+            };
+
+            return cardData;
+        }
+
+        function sanitizeFilename(name) {
+            // Remove characters not suitable for filenames and replace spaces
+            return name.replace(/[^a-z0-9_\-\s]/gi, '').replace(/\s+/g, '_').toLowerCase() || 'character_card';
+        }
+
+        // --- Event Handlers ---
+        function handleGenerateAndDownload() {
+            const cardData = generateJsonData();
+            if (!cardData) return; // Validation failed
+
+            try {
+                const jsonString = JSON.stringify(cardData, null, 2); // Pretty print JSON
+                jsonPreview.textContent = jsonString; // Show in preview
+
+                // Create Blob
+                const blob = new Blob([jsonString], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+
+                // Create download link
+                const a = document.createElement('a');
+                a.href = url;
+                const filename = `${sanitizeFilename(cardData.name)}.json`;
+                a.download = filename;
+
+                // Trigger download
+                document.body.appendChild(a); // Required for Firefox
+                a.click();
+                document.body.removeChild(a);
+
+                // Clean up
+                URL.revokeObjectURL(url);
+
+                showStatus(`Successfully generated and downloaded ${filename}`, false);
+
+            } catch (error) {
+                console.error('Error generating or downloading JSON:', error);
+                showStatus('Error generating or downloading JSON. Check console for details.', true);
+                jsonPreview.textContent = ''; // Clear preview on error
+            }
+        }
+
+        function handlePreviewJson() {
+             const cardData = generateJsonData();
+             if (!cardData) {
+                 jsonPreview.textContent = ''; // Clear preview if validation fails
+                 return;
+             }
+
+            try {
+                const jsonString = JSON.stringify(cardData, null, 2);
+                jsonPreview.textContent = jsonString;
+                showStatus('JSON preview updated.', false);
+            } catch (error) {
+                console.error('Error generating JSON preview:', error);
+                showStatus('Error generating JSON preview. Check console for details.', true);
+                jsonPreview.textContent = ''; // Clear preview on error
+            }
+        }
+
+        function handleClearFields() {
+            form.reset(); // Resets all form fields
+            jsonPreview.textContent = '';
+            showStatus(''); // Clear status message
+        }
+
+        // --- Attach Event Listeners ---
+        generateButton.addEventListener('click', handleGenerateAndDownload);
+        previewButton.addEventListener('click', handlePreviewJson);
+        clearButton.addEventListener('click', handleClearFields);
+
+        // Optional: Preview JSON automatically when fields change (debounced)
+        let previewDebounceTimer;
+        form.addEventListener('input', () => {
+            clearTimeout(previewDebounceTimer);
+            previewDebounceTimer = setTimeout(handlePreviewJson, 500); // Debounce preview update
+        });
+
+    </script>
+</body>
+</html>
