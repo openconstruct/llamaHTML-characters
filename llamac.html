@@ -1,5 +1,3 @@
---- START OF FILE llama.html ---
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,11 +11,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 
     <style>
-        /* Basic Reset & Root Variables */
+
         :root {
             --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             --transition-speed: 0.3s ease;
-            /* Light Theme (Default) */
+
             --bg-color: #f8f9fa;
             --text-color: #212529;
             --primary-color: #007bff;
@@ -26,11 +24,12 @@
             --card-bg: #ffffff;
             --input-bg: #ffffff;
             --input-border: #ced4da;
-            --button-bg: #007bff;
+            --button-bg: var(--primary-color);
             --button-text: #ffffff;
             --button-hover-bg: #0056b3;
             --error-color: #dc3545;
             --warning-color: #ffc107;
+            --info-color: #17a2b8;
             --code-bg: #e9ecef;
             --border-color: #dee2e6;
             --shadow-color: rgba(0, 0, 0, 0.1);
@@ -44,6 +43,13 @@
             --code-action-button-text: var(--secondary-color);
             --copy-button-copied-bg: #28a745;
             --copy-button-copied-text: #ffffff;
+            --button-delete-bg: var(--error-color);
+            --button-delete-hover-bg: #c82333;
+            --button-save-bg: #28a745;
+            --button-save-hover-bg: #218838;
+            --character-card-bg: var(--input-bg);
+            --character-card-border: var(--input-border);
+            --character-card-text: var(--text-color);
         }
 
         html[data-theme='dark'] {
@@ -60,6 +66,7 @@
             --button-hover-bg: #2196f3;
             --error-color: #f44336;
             --warning-color: #ffca28;
+            --info-color: #4dd0e1;
             --code-bg: #222;
             --border-color: #444;
             --shadow-color: rgba(255, 255, 255, 0.1);
@@ -71,6 +78,13 @@
             --code-action-button-text: var(--secondary-color);
             --copy-button-copied-bg: #34c759;
             --copy-button-copied-text: #111;
+            --button-delete-bg: var(--error-color);
+            --button-delete-hover-bg: #d32f2f;
+            --button-save-bg: #34c759;
+            --button-save-hover-bg: #2aa74a;
+            --character-card-bg: var(--input-bg);
+            --character-card-border: var(--input-border);
+            --character-card-text: var(--text-color);
         }
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -104,27 +118,127 @@
         }
         .input-group { margin-bottom: 20px; }
         .input-group label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--secondary-color); transition: color var(--transition-speed); }
-        .input-group input[type="text"], .input-group input[type="password"], .input-group input[type="number"], .input-group input[type="url"], .input-group textarea, .input-group select, .input-group input[type="file"] { width: 100%; padding: 12px 15px; border: 1px solid var(--input-border); border-radius: 6px; font-size: 1rem; background-color: var(--input-bg); color: var(--text-color); transition: border-color var(--transition-speed), background-color var(--transition-speed), color var(--transition-speed); }
-        .input-group input:focus, .input-group textarea:focus, .input-group select:focus, .input-group input[type="file"]:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.25); }
-        /* Style file input slightly differently */
-        .input-group input[type="file"] { padding: 8px; }
+        .input-group input[type="text"], .input-group input[type="password"], .input-group input[type="number"], .input-group input[type="url"], .input-group textarea, .input-group select { width: 100%; padding: 12px 15px; border: 1px solid var(--input-border); border-radius: 6px; font-size: 1rem; background-color: var(--input-bg); color: var(--text-color); transition: border-color var(--transition-speed), background-color var(--transition-speed), color var(--transition-speed); }
+        .input-group input:focus, .input-group textarea:focus, .input-group select:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.25); }
         textarea { resize: vertical; min-height: 120px; }
+
         .button-group { display: flex; gap: 10px; margin-top: 20px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
-        button { padding: 12px 20px; background-color: var(--button-bg); color: var(--button-text); border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 600; transition: background-color var(--transition-speed), transform 0.1s ease; }
-        button:hover:not(:disabled) { background-color: var(--button-hover-bg); transform: translateY(-1px); }
-        button:active:not(:disabled) { transform: translateY(0px); }
+        button, .character-card-button { /* Changed from file-upload-button */
+            padding: 10px 18px;
+            background-color: var(--button-bg);
+            color: var(--button-text);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: background-color var(--transition-speed), transform 0.1s ease;
+            display: inline-block;
+            text-align: center;
+        }
+        button:hover:not(:disabled), .character-card-button:hover {
+            background-color: var(--button-hover-bg);
+            transform: translateY(-1px);
+        }
+        button:active:not(:disabled), .character-card-button:active {
+            transform: translateY(0px);
+        }
         button:disabled { background-color: var(--secondary-color); cursor: not-allowed; opacity: 0.7; }
-        #clearButton, #clearCharacterCardButton /* Apply secondary style to clear buttons */ { background-color: var(--secondary-color); }
-        #clearButton:hover:not(:disabled), #clearCharacterCardButton:hover:not(:disabled) { background-color: #5a6268; }
+        #clearButton { background-color: var(--secondary-color); }
+        #clearButton:hover:not(:disabled) { background-color: #5a6268; }
+        #saveSessionButton { background-color: var(--button-save-bg); }
+        #saveSessionButton:hover:not(:disabled) { background-color: var(--button-save-hover-bg); }
+        #deleteSessionButton { background-color: var(--button-delete-bg); }
+        #deleteSessionButton:hover:not(:disabled) { background-color: var(--button-delete-hover-bg); }
+        .character-card-button { background-color: var(--info-color); display: inline-block; } /* Style label like a button */
+        .character-card-button:hover { background-color: #138496; }
+
+        /* --- Character Card Input --- */
+        #characterCardInput { display: none; } /* Hide the actual file input */
+
+        /* --- Character Card Display --- */
+        .character-card-area {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px dashed var(--border-color);
+            border-radius: 6px;
+            background-color: var(--character-card-bg);
+            transition: border-color var(--transition-speed), background-color var(--transition-speed);
+        }
+        #characterDisplayArea {
+            display: flex; /* Changed to flex for better layout */
+            gap: 15px;
+            align-items: flex-start; /* Align items to the top */
+            margin-top: 15px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 15px;
+            color: var(--character-card-text);
+            transition: color var(--transition-speed), border-color var(--transition-speed);
+        }
+        #characterPhoto {
+            width: 128px; /* Adjusted size */
+            height: 128px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            transition: border-color var(--transition-speed);
+            flex-shrink: 0; /* Prevent image from shrinking */
+        }
+        #characterInfo {
+            flex-grow: 1; /* Allow text info to take remaining space */
+            font-size: 0.9em;
+        }
+        #characterName {
+            display: block;
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--primary-color); /* Use primary color for name */
+            transition: color var(--transition-speed);
+        }
+         #characterDescription {
+            display: block;
+            margin-top: 8px;
+            font-style: italic;
+            color: var(--secondary-color);
+             transition: color var(--transition-speed);
+        }
+        .clear-character-button {
+            background: none;
+            border: none;
+            color: var(--secondary-color);
+            cursor: pointer;
+            font-size: 1em;
+            padding: 2px 5px;
+            line-height: 1;
+            border-radius: 3px;
+            transition: background-color var(--transition-speed), color var(--transition-speed);
+            flex-shrink: 0;
+            margin-left: auto; /* Push to the right */
+            align-self: flex-start; /* Align to top */
+        }
+        .clear-character-button:hover {
+             background-color: var(--code-bg);
+             color: var(--error-color);
+         }
+
+        /* --- End Character Card --- */
 
 
-        #status { margin: 20px 0; font-weight: bold; min-height: 1.6em; display: flex; align-items: center; gap: 10px; transition: color var(--transition-speed); }
+        #sendButton.stop-button {
+            background-color: var(--error-color);
+        }
+        #sendButton.stop-button:hover:not(:disabled) {
+            background-color: var(--button-delete-hover-bg);
+        }
+
+        #status { margin: 15px 0; font-weight: bold; min-height: 1.6em; display: flex; align-items: center; gap: 10px; transition: color var(--transition-speed); font-size: 0.9em; }
         #status.error { color: var(--error-color); }
         #status.warning { color: var(--warning-color); }
-        .loader { border: 4px solid var(--input-border); border-top: 4px solid var(--primary-color); border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-right: 8px; }
+        #status.info { color: var(--info-color); }
+        .loader { border: 3px solid var(--input-border); border-top: 3px solid var(--primary-color); border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-right: 6px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* --- Chat History Area --- */
         .response-area {
             background-color: var(--input-bg);
             border: 1px solid var(--border-color);
@@ -134,6 +248,7 @@
             overflow-y: auto;
             flex-grow: 1;
             min-height: 200px;
+            max-height: 50vh;
             transition: background-color var(--transition-speed), border-color var(--transition-speed);
             display: flex;
             flex-direction: column;
@@ -153,7 +268,6 @@
             font-style: italic;
         }
 
-        /* --- Chat Bubbles --- */
         .chat-bubble {
             padding: 10px 15px;
             border-radius: 15px;
@@ -163,6 +277,7 @@
             box-shadow: 0 1px 2px var(--shadow-color);
             transition: background-color var(--transition-speed), color var(--transition-speed);
             line-height: 1.5;
+            white-space: pre-wrap;
         }
         .user-bubble {
             background-color: var(--user-bubble-bg);
@@ -170,6 +285,7 @@
             border-bottom-right-radius: 5px;
             align-self: flex-end;
             margin-left: auto;
+             white-space: pre-wrap;
         }
         .model-bubble {
             background-color: var(--model-bubble-bg);
@@ -177,11 +293,11 @@
             border-bottom-left-radius: 5px;
             align-self: flex-start;
             margin-right: auto;
+            white-space: normal;
         }
         .chat-bubble :first-child { margin-top: 0; }
         .chat-bubble :last-child { margin-bottom: 0; }
 
-        /* Markdown Styles within Bubbles */
         .model-bubble h1, .model-bubble h2, .model-bubble h3 { margin-top: 0.8em; margin-bottom: 0.4em; font-weight: 600; border-bottom: 1px solid var(--border-color); padding-bottom: 0.2em; transition: border-color var(--transition-speed); }
         .model-bubble h1 { font-size: 1.3em; } .model-bubble h2 { font-size: 1.15em; } .model-bubble h3 { font-size: 1.05em; }
         .model-bubble p { margin-bottom: 0.8em; }
@@ -197,18 +313,25 @@
             margin: 0.8em 0;
             transition: background-color var(--transition-speed);
             position: relative;
-            padding-top: 35px; /* More Space for buttons */
+            padding-top: 35px;
         }
-        .model-bubble pre code { background-color: transparent; padding: 0; font-family: 'Courier New', Courier, monospace; font-size: 0.85em; color: inherit; white-space: pre; }
+        .model-bubble pre code {
+            background-color: transparent;
+            padding: 0;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.85em;
+            color: inherit;
+            white-space: pre;
+        }
 
-        /* --- Code Block Action Buttons (Copy/Download) --- */
+        /* --- Styles for Code Action Buttons --- */
         .code-actions {
-             position: absolute;
-             top: 5px;
-             right: 5px;
-             display: flex;
-             gap: 5px;
-             z-index: 1;
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            display: flex;
+            gap: 5px;
+            z-index: 1;
         }
         .code-action-button {
             padding: 3px 6px;
@@ -221,16 +344,21 @@
             opacity: 0.6;
             transition: opacity 0.2s ease, background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
         }
-        .model-bubble pre:hover .code-action-button { opacity: 1; }
-        .code-action-button:hover { background-color: var(--code-action-button-hover-bg); }
-        .copy-code-button.copied {
-             background-color: var(--copy-button-copied-bg);
-             color: var(--copy-button-copied-text);
-             opacity: 1;
-             border-color: transparent; /* Hide border when copied */
+        .model-bubble pre:hover .code-action-button {
+            opacity: 1;
         }
+        .code-action-button:hover {
+            background-color: var(--code-action-button-hover-bg);
+        }
+        .copy-code-button.copied {
+            background-color: var(--copy-button-copied-bg);
+            color: var(--copy-button-copied-text);
+            opacity: 1;
+            border-color: transparent;
+        }
+        /* --- End Styles for Code Action Buttons --- */
 
-        /* --- Config & Footer --- */
+
         .server-url-options { display: flex; align-items: center; gap: 10px; margin-top: 5px; font-size: 0.9em; color: var(--secondary-color); }
         .server-url-options input[type="checkbox"] { margin-right: 5px; }
         .config-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; padding: 15px; border: 1px dashed var(--border-color); border-radius: 6px; transition: border-color var(--transition-speed); }
@@ -240,33 +368,16 @@
         footer a { color: var(--primary-color); text-decoration: none; transition: color var(--transition-speed); }
         footer a:hover { text-decoration: underline; }
 
-        /* --- Input Area --- */
-        .input-area { margin-top: 10px; }
-        .input-area .input-group { margin-bottom: 10px; }
-        .input-area .button-group { margin-top: 0; margin-bottom: 10px; }
+        .session-management { padding: 15px; margin-bottom: 20px; border: 1px dashed var(--border-color); border-radius: 6px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+        .session-management label { font-weight: 600; color: var(--secondary-color); margin-right: 5px; flex-shrink: 0; }
+        .session-management select { flex-grow: 1; min-width: 150px; padding: 8px 12px; }
+        .session-management button { padding: 8px 15px; flex-shrink: 0; }
 
-        /* --- Character Card Section --- */
-        .character-card-section {
-            padding: 15px;
-            border: 1px dashed var(--border-color);
-            border-radius: 6px;
-            margin-bottom: 20px; /* Spacing below card section */
-            transition: border-color var(--transition-speed);
-        }
-        .character-card-section .input-group { margin-bottom: 10px; } /* Less bottom margin within card section */
-        #currentCharacterDisplay {
-            margin-top: 10px;
-            margin-bottom: 15px;
-            font-style: italic;
-            color: var(--secondary-color);
-            transition: color var(--transition-speed);
-        }
-        #clearCharacterCardButton {
-            margin-bottom: 0; /* Removed default bottom margin */
-            margin-top: 5px; /* Add some space above */
-            padding: 8px 15px; /* Slightly smaller button */
-            font-size: 0.9rem;
-        }
+        .input-area { margin-top: auto; padding-top: 15px; border-top: 1px solid var(--border-color); transition: border-color var(--transition-speed); }
+        .input-area .input-group { margin-bottom: 10px; }
+        .input-area .button-group { margin-top: 0; margin-bottom: 10px; justify-content: flex-start;  }
+
+        /* REMOVED file-input-area and related styles */
 
     </style>
 </head>
@@ -286,7 +397,8 @@
                  <label for="rememberServerUrl">Remember URL (Uses Local Storage)</label>
             </div>
              <small style="display: block; margin-top: 5px; color: var(--secondary-color);">
-                Ensure your llama.cpp server is running (with `--host 0.0.0.0` if needed for external access) and accessible. Needs `/completion` endpoint.
+                 <!-- Please report any issues on github. -->
+                 Character cards should be JSON files (name, description, photo URL required).
              </small>
         </div>
 
@@ -316,20 +428,29 @@
             </div>
         </details>
 
-        <!-- === START: Character Card Section === -->
-        <h2>Character Card</h2>
-        <div class="character-card-section">
-            <div class="input-group">
-                <label for="characterCardFile">Load Character Card (JSON):</label>
-                <input type="file" id="characterCardFile" accept=".json,application/json">
-                 <small style="display: block; margin-top: 5px; color: var(--secondary-color);">
-                    Select a JSON file defining the character (name, description, etc.). Required fields: name, description. Optional: age, gender, disposition.
-                 </small>
-            </div>
-             <div id="currentCharacterDisplay">Current Character: None</div>
-            <button id="clearCharacterCardButton">Clear Current Character</button>
+        <!-- Session Management Section -->
+        <div class="session-management">
+            <label for="sessionSelect">Session:</label>
+            <select id="sessionSelect"></select>
+            <button id="saveSessionButton" title="Save current chat and character as a session">Save</button>
+            <button id="deleteSessionButton" title="Delete the selected session">Delete</button>
         </div>
-        <!-- === END: Character Card Section === -->
+
+        <!-- Character Card Section -->
+        <div class="character-card-area">
+            <label for="characterCardInput" class="character-card-button">Load Character Card (.json)</label>
+            <input type="file" id="characterCardInput" accept=".json,application/json">
+            <div id="characterDisplayArea" style="display: none;">
+                <img id="characterPhoto" src="#" alt="Character Photo">
+                <div id="characterInfo">
+                    <span id="characterName"></span>
+                    <span id="characterDescription"></span>
+                    <!-- Add more fields if needed -->
+                </div>
+                 <button id="clearCharacterButton" class="clear-character-button" title="Remove Character Card">&times;</button>
+            </div>
+        </div>
+
 
         <h2>Conversation History</h2>
         <div class="response-area" id="responseArea">
@@ -340,27 +461,32 @@
 
         <div id="status"></div>
 
-
         <div class="input-area">
+            <!-- REMOVED File Upload Area -->
+
             <div class="input-group">
                 <label for="prompt">Your Message (Ctrl+Enter to send):</label>
-                <textarea id="prompt" rows="4" placeholder="Enter your message here..."></textarea>
+                <textarea id="prompt" rows="3" placeholder="Enter your message here..."></textarea>
             </div>
 
             <div class="button-group">
-                <button id="sendButton">Send</button>
-                <button id="clearButton">Clear Chat</button>
+                <button id="sendButton">Send</button> <!-- Initially 'Send' -->
+                <button id="clearButton">Clear / New Chat</button>
             </div>
         </div>
 
     </div>
 
      <footer>
-        Powered by a local <a href="https://github.com/ggerganov/llama.cpp/tree/master/examples/server" target="_blank" rel="noopener noreferrer">llama.cpp server</a>. Model determined by server configuration.
+        Powered by a local <a href="https://github.com/ggerganov/llama.cpp/tree/master/examples/server" target="_blank" rel="noopener noreferrer">llama.cpp server</a>. Model determined by server configuration. Character card feature added.
      </footer>
 
     <script>
-        // --- DOM Elements ---
+
+        const SESSION_INDEX_KEY = 'llamaChatIndex';
+        const SESSION_DATA_PREFIX = 'llamaChatSession_';
+        // REMOVED MAX_TEXT_FILE_EMBED_SIZE
+
         const serverUrlInput = document.getElementById('serverUrl');
         const rememberServerUrlCheckbox = document.getElementById('rememberServerUrl');
         const promptInput = document.getElementById('prompt');
@@ -376,20 +502,38 @@
         const topKInput = document.getElementById('topK');
         const stopSequencesInput = document.getElementById('stopSequences');
         const highlightThemeLink = document.getElementById('highlight-theme');
-        // NEW: Character Card Elements
-        const characterCardFileInput = document.getElementById('characterCardFile');
-        const currentCharacterDisplay = document.getElementById('currentCharacterDisplay');
-        const clearCharacterCardButton = document.getElementById('clearCharacterCardButton');
 
+        const sessionSelect = document.getElementById('sessionSelect');
+        const saveSessionButton = document.getElementById('saveSessionButton');
+        const deleteSessionButton = document.getElementById('deleteSessionButton');
 
-        // --- State ---
-        let chatHistory = []; // Stores messages as { role: 'user'/'model', content: '...', id: 'msg-...' }
+        // Character Card Elements
+        const characterCardInput = document.getElementById('characterCardInput');
+        const characterDisplayArea = document.getElementById('characterDisplayArea');
+        const characterPhoto = document.getElementById('characterPhoto');
+        const characterName = document.getElementById('characterName');
+        const characterDescription = document.getElementById('characterDescription');
+        const clearCharacterButton = document.getElementById('clearCharacterButton');
+
+        // REMOVED fileInput, stagedFilesArea
+
+        let chatHistory = [];
         let serverAvailable = false;
-        let messageCounter = 0; // For unique message IDs
-        let currentAbortController = null; // To allow cancelling fetches
-        let currentCharacterCard = null; // NEW: Holds loaded character data { name, age?, gender?, disposition?, description }
+        let messageCounter = 0;
+        let currentSessionId = null;
+        let currentAbortController = null;
+        let currentCharacterCard = null; // Holds the loaded character card data
+        // REMOVED stagedFiles
 
-        // --- Debounce Helper ---
+        function handleStopGeneration() {
+            if (currentAbortController) {
+                console.log("Stop button clicked. Aborting request...");
+                showStatus("Cancelling request...", false, true);
+                currentAbortController.abort();
+
+            }
+        }
+
         function debounce(func, wait) {
             let timeout;
             return function executedFunction(...args) {
@@ -402,19 +546,19 @@
             };
         }
 
-        // --- Initialization ---
         function initialize() {
             loadServerUrl();
             setupEventListeners();
             initializeTheme();
             configureMarked();
-            checkServerStatus(); // Initial check
-            renderChatHistory();
-            updateSendButtonState(); // Set initial state based on URL
-            updateCharacterDisplay(); // NEW: Initial character display
+            checkServerStatus();
+            populateSessionDropdown();
+            startNewSession(); // This will also handle initial character display (none)
+            updateSendButtonState();
+            updateSessionButtonStates();
         }
 
-        function configureMarked() {
+         function configureMarked() {
              marked.setOptions({
                 highlight: function(code, lang) {
                     const language = hljs.getLanguage(lang) ? lang : 'plaintext';
@@ -428,36 +572,51 @@
                            return result.value;
                        } catch (e2) {
                             console.error("Highlight.js auto-detection failed:", e2);
-                            return escapeHtml(code); // Basic escaping fallback
+                            return escapeHtml(code);
                        }
                     }
                 },
                 gfm: true,
                 breaks: true,
+                langPrefix: 'hljs language-',
             });
         }
 
-        // --- Event Listeners ---
         function setupEventListeners() {
+
             sendButton.addEventListener('click', handleSendPrompt);
-            clearButton.addEventListener('click', clearAll);
+
+            clearButton.addEventListener('click', () => {
+                if (currentAbortController) {
+                   handleStopGeneration();
+                }
+                startNewSession();
+            });
             themeSwitcher.addEventListener('click', toggleTheme);
             rememberServerUrlCheckbox.addEventListener('change', handleRememberUrlChange);
             serverUrlInput.addEventListener('input', handleServerUrlInput);
+
+            promptInput.addEventListener('input', updateSendButtonState);
+
             promptInput.addEventListener('keydown', (event) => {
-                if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+                if ((event.ctrlKey || event.metaKey) && event.key === 'Enter' && !event.shiftKey && !event.altKey) {
                     event.preventDefault();
-                    if (!sendButton.disabled) {
+                    if (!sendButton.disabled && sendButton.textContent === 'Send') {
                         handleSendPrompt();
                     }
                 }
             });
 
-            // NEW: Character Card Listeners
-            characterCardFileInput.addEventListener('change', handleCharacterFileLoad);
-            clearCharacterCardButton.addEventListener('click', clearCharacterCard);
+            saveSessionButton.addEventListener('click', handleSaveSession);
+            sessionSelect.addEventListener('change', handleLoadSession);
+            deleteSessionButton.addEventListener('click', handleDeleteSession);
 
-            // Delegate clicks for code block actions
+            // Character Card Listener
+            characterCardInput.addEventListener('change', handleCharacterCardLoad);
+            clearCharacterButton.addEventListener('click', clearCharacterCard);
+
+            // REMOVED fileInput and stagedFilesArea listeners
+
             chatContainer.addEventListener('click', function(event) {
                 if (event.target.classList.contains('copy-code-button')) {
                     handleCopyCodeClick(event.target);
@@ -467,7 +626,6 @@
             });
         }
 
-        // --- Server URL Handling ---
         function loadServerUrl() {
             const rememberedUrl = localStorage.getItem('llamaServerUrl');
             const shouldRemember = localStorage.getItem('rememberLlamaServerUrl') === 'true';
@@ -477,7 +635,6 @@
                 console.info("Server URL loaded from Local Storage.");
             }
         }
-
         function handleRememberUrlChange() {
             const url = serverUrlInput.value.trim();
             if (rememberServerUrlCheckbox.checked) {
@@ -486,7 +643,7 @@
                     localStorage.setItem('rememberLlamaServerUrl', 'true');
                     console.info("Server URL saved to Local Storage.");
                 } else {
-                    rememberServerUrlCheckbox.checked = false; // Don't save empty
+                    rememberServerUrlCheckbox.checked = false;
                     localStorage.removeItem('llamaServerUrl');
                     localStorage.removeItem('rememberLlamaServerUrl');
                 }
@@ -496,15 +653,15 @@
                 console.info("Server URL removed from Local Storage.");
             }
         }
-
         let serverUrlDebounceTimer;
         function handleServerUrlInput() {
-             handleRememberUrlChange(); // Update storage immediately if checked
+             handleRememberUrlChange();
+
              clearTimeout(serverUrlDebounceTimer);
              serverUrlDebounceTimer = setTimeout(() => {
                  checkServerStatus();
                  updateSendButtonState();
-             }, 500); // Debounce check
+             }, 500);
          }
 
          async function checkServerStatus() {
@@ -515,16 +672,22 @@
                 updateSendButtonState();
                 return;
             }
-            // Minimal check: assume OK if URL is valid, rely on API call for real check
-            showStatus("Server URL looks valid. Ready to send.", false);
+            showStatus("Server URL looks valid. Ready to send.", false, false, true);
             serverAvailable = true;
             updateSendButtonState();
         }
 
         function updateSendButtonState() {
+            if (currentAbortController) {
+                sendButton.disabled = false; // Stop button should always be enabled
+                return;
+            }
+
             const urlValid = isValidHttpUrl(serverUrlInput.value.trim());
             const isLoading = statusDiv.querySelector('.loader') !== null;
-            sendButton.disabled = !urlValid || isLoading; // Disable if loading or URL invalid
+            // Can send if URL is valid, not loading, and prompt has text
+            const canSend = urlValid && !isLoading && promptInput.value.trim().length > 0;
+            sendButton.disabled = !canSend;
         }
 
         function isValidHttpUrl(string) {
@@ -537,7 +700,6 @@
             return url.protocol === "http:" || url.protocol === "https:";
         }
 
-        // --- Theme Handling ---
         function initializeTheme() {
             const savedTheme = localStorage.getItem('theme') || 'light';
             setTheme(savedTheme);
@@ -546,7 +708,8 @@
             const html = document.documentElement;
             html.setAttribute('data-theme', theme);
             themeSwitcher.textContent = theme === 'dark' ? 'Light' : 'Dark';
-            themeSwitcher.title = theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+            themeSwitcher.title = theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Light Mode';
+
             const lightThemeUrl = getComputedStyle(html).getPropertyValue('--highlight-style-light').trim().replace(/['"]/g,'');
             const darkThemeUrl = getComputedStyle(html).getPropertyValue('--highlight-style-dark').trim().replace(/['"]/g,'');
             highlightThemeLink.href = theme === 'dark' ? darkThemeUrl : lightThemeUrl;
@@ -557,94 +720,115 @@
             const newTheme = currentTheme === 'light' ? 'dark' : 'light';
             setTheme(newTheme);
         }
-        // --- End Theme Handling ---
 
-        // --- NEW: Character Card Functions ---
-        function handleCharacterFileLoad(event) {
+        // --- Character Card Functions ---
+        function handleCharacterCardLoad(event) {
             const file = event.target.files[0];
-            if (!file) {
-                return; // No file selected
-            }
+            if (!file) return;
 
-            if (file.type !== 'application/json' && !file.name.toLowerCase().endsWith('.json')) {
-                showStatus("Error: Please select a valid JSON file (.json) for the character card.", true);
+            if (file.type !== 'application/json' && !file.name.endsWith('.json')) {
+                showStatus("Error: Please select a JSON file for the character card.", true);
                 event.target.value = null; // Clear the input
                 return;
             }
 
             const reader = new FileReader();
-            reader.onload = (e) => {
+            showLoading(true, "Loading character card...");
+
+            reader.onload = function(e) {
                 try {
                     const cardData = JSON.parse(e.target.result);
 
-                    // Basic Validation (ensure essential fields exist)
-                    if (!cardData.name || !cardData.description) {
-                        throw new Error("Character card JSON must include at least 'name' and 'description' fields.");
+                    // --- Basic Validation ---
+                    if (!cardData || typeof cardData !== 'object') {
+                        throw new Error("Invalid JSON structure. Expected an object.");
                     }
-
-                    // Validate field types (simple check) - provide warnings
-                    if (typeof cardData.name !== 'string') console.warn("Character card field 'name' should be a string.");
-                    if (cardData.age && typeof cardData.age !== 'string' && typeof cardData.age !== 'number') console.warn("Character card field 'age' should be a string or number.");
-                    if (cardData.gender && typeof cardData.gender !== 'string') console.warn("Character card field 'gender' should be a string.");
-                    if (cardData.disposition && typeof cardData.disposition !== 'string') console.warn("Character card field 'disposition' should be a string.");
-                    if (typeof cardData.description !== 'string') console.warn("Character card field 'description' should be a string.");
-
+                    if (!cardData.name || typeof cardData.name !== 'string') {
+                        throw new Error("Character card missing required 'name' field (string).");
+                    }
+                    if (!cardData.description || typeof cardData.description !== 'string') {
+                        throw new Error("Character card missing required 'description' field (string).");
+                    }
+                     if (!cardData.photo || typeof cardData.photo !== 'string' || !isValidHttpUrl(cardData.photo)) {
+                        throw new Error("Character card missing or invalid 'photo' field (must be a valid URL string).");
+                     }
+                     // Optional fields can be added here for validation if needed
 
                     currentCharacterCard = cardData;
-                    console.log("Character Card Loaded:", currentCharacterCard);
-                    updateCharacterDisplay();
-                    showStatus(`Character Card "${currentCharacterCard.name}" loaded successfully.`, false);
+                    displayCharacterCardInfo();
+                    showStatus(`Character card "${currentCharacterCard.name}" loaded.`, false, false, true);
+                    // Optional: Ask user if they want to clear chat when loading a new character?
+                    // if (chatHistory.length > 0 && confirm(`Character loaded. Start a new chat with ${currentCharacterCard.name}?`)) {
+                    //     startNewSession(); // This will keep the card but clear history
+                    // }
 
                 } catch (error) {
-                    console.error("Error loading or parsing character card:", error);
+                    console.error("Error parsing character card JSON:", error);
                     showStatus(`Error loading character card: ${error.message}`, true);
-                    currentCharacterCard = null; // Ensure it's cleared on error
-                    updateCharacterDisplay();
+                    currentCharacterCard = null; // Ensure card is cleared on error
+                    displayCharacterCardInfo(); // Hide display area
                 } finally {
-                    event.target.value = null; // Clear the input value to allow re-loading the same file
+                    showLoading(false);
+                    event.target.value = null; // Clear the input so the same file can be loaded again
+                    updateSendButtonState(); // Re-evaluate send button state
                 }
             };
-            reader.onerror = (e) => {
+
+            reader.onerror = function(e) {
                 console.error("Error reading character card file:", e);
-                showStatus("Error reading character card file.", true);
-                currentCharacterCard = null;
-                updateCharacterDisplay();
+                showStatus(`Error reading file: ${e.target.error?.message || 'Unknown error'}`, true);
+                showLoading(false);
                 event.target.value = null;
+                currentCharacterCard = null;
+                displayCharacterCardInfo();
             };
+
             reader.readAsText(file);
         }
 
-        function clearCharacterCard() {
+        function displayCharacterCardInfo() {
             if (currentCharacterCard) {
-                const previousName = currentCharacterCard.name;
-                currentCharacterCard = null;
-                updateCharacterDisplay();
-                showStatus(`Character Card "${previousName}" cleared.`, false);
-                console.log("Character Card cleared.");
+                characterName.textContent = currentCharacterCard.name || 'Unnamed Character';
+                characterDescription.textContent = currentCharacterCard.description || 'No description provided.';
+                characterPhoto.src = currentCharacterCard.photo || '#'; // Use '#' as fallback? Or a placeholder image?
+                characterPhoto.alt = `Photo of ${currentCharacterCard.name || 'Character'}`;
+                characterDisplayArea.style.display = 'flex'; // Use flex to show
             } else {
-                showStatus("No character card is currently loaded.", false);
+                characterName.textContent = '';
+                characterDescription.textContent = '';
+                characterPhoto.src = '#';
+                characterPhoto.alt = 'Character Photo';
+                characterDisplayArea.style.display = 'none';
             }
-            characterCardFileInput.value = null; // Also clear the file input visually
         }
 
-        function updateCharacterDisplay() {
-            if (currentCharacterCard && currentCharacterCard.name) {
-                currentCharacterDisplay.textContent = `Current Character: ${escapeHtml(currentCharacterCard.name)}`;
-                currentCharacterDisplay.style.fontWeight = 'bold';
-                currentCharacterDisplay.style.color = 'var(--primary-color)'; // Make it stand out slightly
-            } else {
-                currentCharacterDisplay.textContent = `Current Character: None`;
-                 currentCharacterDisplay.style.fontWeight = 'normal';
-                 currentCharacterDisplay.style.color = 'var(--secondary-color)'; // Reset style
+         function clearCharacterCard() {
+            if (currentCharacterCard) {
+                 currentCharacterCard = null;
+                 displayCharacterCardInfo();
+                 showStatus("Character card removed.", false, false, true);
+                 // Should we clear chat too? Maybe ask? For now, just remove the card.
+                 // promptInput.focus();
             }
-        }
+         }
         // --- End Character Card Functions ---
 
 
-        // --- Main API Call Logic (Streaming) ---
+        // REMOVED File Handling Functions (handleFileSelection, finishFileProcessing, renderStagedFiles, handleRemoveStagedFile, clearStagedFiles)
+
         async function handleSendPrompt() {
+            sendButton.removeEventListener('click', handleSendPrompt);
+            sendButton.removeEventListener('click', handleStopGeneration);
+
+            sendButton.textContent = 'Stop';
+            sendButton.classList.add('stop-button');
+            sendButton.title = 'Cancel Generation';
+            sendButton.addEventListener('click', handleStopGeneration);
+            sendButton.disabled = false;
+            promptInput.disabled = true;
+
             const serverUrl = serverUrlInput.value.trim();
-            const promptText = promptInput.value.trim();
+            let promptText = promptInput.value.trim();
             const temperature = parseFloat(temperatureInput.value);
             const nPredict = parseInt(nPredictInput.value, 10);
             const topP = parseFloat(topPInput.value);
@@ -653,92 +837,106 @@
                                       .map(s => s.trim())
                                       .filter(s => s.length > 0);
 
-            // Validation
-            if (!isValidHttpUrl(serverUrl)) { showStatus("Error: Invalid or missing server URL.", true); serverUrlInput.focus(); return; }
-            if (!promptText) { showStatus("Error: Message cannot be empty.", true); promptInput.focus(); return; }
+            if (!promptText) { // Check only for prompt text now
+                showStatus("Error: Message cannot be empty.", true);
+                 resetButtonToSendState();
+                 promptInput.disabled = false;
+                 updateSendButtonState();
+                return;
+            }
 
-            // Cancel previous request if running
+            // REMOVED File checks
+
+            // Prepare user message (just the text)
+            const fullUserContent = promptText;
+
             if (currentAbortController) {
+                console.warn("Aborting previous fetch request.");
                 currentAbortController.abort();
-                console.log("Previous request aborted.");
             }
             currentAbortController = new AbortController();
             const signal = currentAbortController.signal;
 
-            // Add user message
             const userMessageId = `msg-${messageCounter++}`;
-            const userMessage = { role: 'user', content: promptText, id: userMessageId };
+            const userMessage = { role: 'user', content: fullUserContent, id: userMessageId };
             chatHistory.push(userMessage);
             renderChatHistory(); // Render user message immediately
             scrollToBottom();
-            promptInput.value = '';
+            promptInput.value = ''; // Clear input after sending
+            // REMOVED clearStagedFiles();
             showLoading(true, "Connecting...");
+            updateSessionButtonStates();
 
-            // Prepare model message structure (will be filled by stream)
+            // Prepare placeholder for model response
             const modelMessageId = `msg-${messageCounter++}`;
             const modelMessage = { role: 'model', content: '', id: modelMessageId };
             chatHistory.push(modelMessage);
-            const modelBubble = createChatBubbleElement(modelMessage); // Create bubble shell
+            const modelBubble = createChatBubbleElement(modelMessage);
             chatContainer.appendChild(modelBubble);
-            updateChatPlaceholder(); // Remove placeholder if needed
-            scrollToBottom(); // Scroll to include the new empty bubble
+            updateChatPlaceholder();
+            scrollToBottom();
 
-            // Prepare API request body
-            // --->>> MODIFICATION: Uses updated formatChatHistoryForLlama <<<---
-            const fullPrompt = formatChatHistoryForLlama(chatHistory.slice(0, -1)); // Exclude the empty model message
+            // Prepare prompt for llama.cpp server format, potentially including character card info
+            const fullPromptForLlama = formatChatHistoryForLlama(chatHistory.slice(0, -1)); // Exclude the empty model message
             const apiUrl = `${serverUrl}/completion`;
             const requestBody = {
-                prompt: fullPrompt,
+                prompt: fullPromptForLlama,
                 temperature: temperature,
                 n_predict: nPredict === -1 ? -1 : Math.max(1, nPredict),
                 top_p: topP,
                 top_k: topK,
                 stop: stopSequences,
-                stream: true // <<<<<<----- ENABLE STREAMING
-                // Consider adding 'cache_prompt': true for performance on repeated prompts
-                // 'system_prompt': // Might be useful if server explicitly supports it, but we inject manually for broader compatibility
+                stream: true
+                // NOTE: Standard llama.cpp server doesn't directly support structured system prompts easily via /completion's 'prompt' field alone.
+                // The formatChatHistoryForLlama function attempts to inject it.
+                // For models that support specific roles (like ChatML), the API endpoint and request body might need significant changes.
+                // Image data sending is also removed as file handling was removed.
             };
 
             console.log("Sending API Request to:", apiUrl);
-            console.log("Request Body:", JSON.stringify(requestBody, null, 2));
+            console.log("Request Body (prompt potentially includes character info, truncated):", JSON.stringify({...requestBody, prompt: requestBody.prompt.substring(0, 500) + (requestBody.prompt.length > 500 ? '...' : '') }, null, 2));
+            console.log(`Using message IDs: User=${userMessageId}, Model=${modelMessageId}`);
 
-            // Debounced function for rendering markdown/highlighting during stream
             const debouncedRender = debounce(() => {
-                updateModelBubbleContent(modelMessageId, modelMessage.content, false); // Re-render with current content
-                scrollToBottom(); // Keep scrolling as content expands
-            }, 250); // Adjust debounce time as needed
+                updateModelBubbleContent(modelMessageId, modelMessage.content, false);
+                scrollToBottom();
+            }, 250);
 
-            let responseOk = false; // Track if we received a valid response status
+            let responseOk = false;
+            let wasAborted = false;
 
             try {
                 const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(requestBody),
-                    signal: signal, // Pass the abort signal
+                    signal: signal,
                 });
 
-                responseOk = response.ok; // Store initial status
+                responseOk = response.ok;
 
                 if (!response.ok || !response.body) {
                     let errorText = `API Error: ${response.status} ${response.statusText}`;
                      try {
-                         const errorData = await response.json(); // Try reading error body if possible
+                         const errorData = await response.json();
                          console.error("API Error Response Body:", errorData);
                          if (errorData?.content) errorText += ` - ${errorData.content}`;
                          else if (errorData?.error) errorText += ` - ${errorData.error}`;
-                         else { const textResponse = await response.text(); errorText += ` - Server Response: ${textResponse.substring(0, 300)}${textResponse.length > 300 ? '...' : ''}`; }
-                     } catch (e) { /* ignore if reading body fails */ }
+                         else {
+                            const textResponse = await response.text();
+                            errorText += ` - Server Response: ${textResponse.substring(0, 300)}${textResponse.length > 300 ? '...' : ''}`;
+                         }
+                     } catch (e) { /* Ignore */ }
                      throw new Error(errorText);
                 }
 
-                showLoading(true, "Receiving response..."); // Update status
-                serverAvailable = true; // Got a connection
+                showLoading(true, "Receiving response...");
+                serverAvailable = true;
 
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
                 let buffer = '';
-                let finalData = null; // To store the last JSON message with stats
+                let finalData = null;
 
                 while (true) {
                     const { value, done } = await reader.read();
@@ -748,9 +946,8 @@
                     }
 
                     buffer += decoder.decode(value, { stream: true });
-                    // Process buffer line by line for SSE messages (data: {...}\n\n)
                     let lines = buffer.split('\n\n');
-                    buffer = lines.pop(); // Keep the last (potentially incomplete) message in buffer
+                    buffer = lines.pop();
 
                     for (const line of lines) {
                         if (line.startsWith('data: ')) {
@@ -758,20 +955,15 @@
                             if (jsonData) {
                                 try {
                                     const data = JSON.parse(jsonData);
-                                    // console.log("Stream Data Chunk:", data); // DEBUG
-
                                     if (typeof data.content === 'string') {
                                         modelMessage.content += data.content;
-                                        // Update bubble content directly (more efficient than full re-render)
-                                        updateModelBubbleContent(modelMessageId, modelMessage.content, true); // Append raw text first
-                                        debouncedRender(); // Schedule a debounced re-render/highlight
+                                        updateModelBubbleContent(modelMessageId, modelMessage.content, true);
+                                        debouncedRender();
                                     }
-
                                     if (data.stop === true) {
                                         console.log("Stop signal received in stream:", data);
-                                        finalData = data; // Store final stats
-                                        // Ensure buffer is flushed if stream ends without \n\n
-                                        buffer += decoder.decode(undefined, { stream: false });
+                                        finalData = data;
+                                         buffer += decoder.decode(undefined, { stream: false });
                                          if (buffer.startsWith('data: ')) {
                                              const lastJsonData = buffer.substring(6).trim();
                                              if(lastJsonData) {
@@ -781,8 +973,7 @@
                                                   } catch(e) { console.error("Error parsing final buffer chunk:", e); }
                                              }
                                          }
-                                        buffer = ''; // Clear buffer
-                                        // Do NOT break here, let reader.read() return done:true
+                                        buffer = '';
                                     }
                                 } catch (e) {
                                     console.error("Error parsing stream JSON:", e, "Data:", jsonData);
@@ -790,18 +981,23 @@
                             }
                         }
                     }
-                } // end while(true)
+                } // End while loop
 
-                // Final render after stream completes
-                updateModelBubbleContent(modelMessageId, modelMessage.content, false); // Final full render
+                updateModelBubbleContent(modelMessageId, modelMessage.content, false);
                 scrollToBottom();
 
-                // Update status based on final stream data
                 let statusMessage = "Response complete.";
+                let tokensPerSecond = 0;
                 if (finalData) {
-                    if(finalData.timings) {
+                     console.log("Final data chunk:", finalData);
+                     if (finalData.timings && finalData.tokens_predicted > 0 && finalData.timings.predicted_ms > 0) {
+                         tokensPerSecond = finalData.tokens_predicted / (finalData.timings.predicted_ms / 1000);
+                         statusMessage += ` Speed: ${tokensPerSecond.toFixed(1)} t/s.`;
+                     }
+                    else if(finalData.timings && finalData.timings.predicted_ms > 0) {
                          statusMessage += ` Time: ${((finalData.timings.prompt_ms + finalData.timings.predicted_ms)/1000).toFixed(2)}s.`
                     }
+
                     if (finalData.stopped_eos) statusMessage += ` (Stopped: EOS)`;
                     if (finalData.stopped_word) statusMessage += ` (Stopped: Word)`;
                     if (finalData.stopped_limit) statusMessage += ` (Stopped: Limit)`;
@@ -810,153 +1006,174 @@
 
             } catch (error) {
                 if (error.name === 'AbortError') {
-                   showStatus("Request cancelled by user.", false);
-                   // Remove the partially added user/model message pair for the aborted request
-                   if (chatHistory.length >= 2 && chatHistory[chatHistory.length - 2].id === userMessageId) {
-                       chatHistory.pop(); // Remove model placeholder
-                       chatHistory.pop(); // Remove user message
-                   }
-                   renderChatHistory(); // Re-render without the aborted messages
-                   return; // Stop processing
-                }
+                    wasAborted = true;
+                    console.log("Fetch aborted by user.");
+                    showStatus("Request cancelled by user.", false, false, true);
 
-                console.error("API Call Failed:", error);
-                let displayError = error.message || 'An unknown error occurred.';
-                if (!responseOk && (displayError.includes('Failed to fetch') || displayError.includes('NetworkError') || displayError.includes('ERR_CONNECTION_REFUSED'))) {
-                     displayError = `Connection Error: Could not connect to server at ${serverUrl}. Is it running?`;
-                     serverAvailable = false;
-                }
+                    const modelBubbleIndex = chatHistory.findIndex(m => m.id === modelMessageId);
+                    if (modelBubbleIndex > -1 && chatHistory[modelBubbleIndex].content.length < 15) {
+                        console.log("Removing very short cancelled model message.");
+                        chatHistory.splice(modelBubbleIndex, 1);
+                        messageCounter--;
+                        renderChatHistory();
+                    } else if (modelBubbleIndex > -1) {
+                         updateModelBubbleContent(modelMessageId, modelMessage.content, false);
+                    }
 
-                // Remove the failed user message and the empty model bubble
-                const userMsgIndex = chatHistory.findIndex(m => m.id === userMessageId);
-                if (userMsgIndex !== -1) {
-                    chatHistory.splice(userMsgIndex, 2); // Remove user and model message
+                } else {
+                     console.error("API Call Failed:", error);
+                     let displayError = error.message || 'An unknown error occurred.';
+                     if (!responseOk && (displayError.includes('Failed to fetch') || displayError.includes('NetworkError') || displayError.includes('ERR_CONNECTION_REFUSED'))) {
+                         displayError = `Connection Error: Could not connect to server at ${serverUrl}. Is it running?`;
+                         serverAvailable = false;
+                     }
+                     const userMsgIndex = chatHistory.findIndex(m => m.id === userMessageId);
+                     if (userMsgIndex !== -1) {
+                        chatHistory.splice(userMsgIndex, 2);
+                        messageCounter -= 2;
+                     }
+                     renderChatHistory();
+                     showStatus(`Error: ${displayError}`, true);
                 }
-                renderChatHistory(); // Re-render to remove the failed attempt bubbles
-                showStatus(`Error: ${displayError}`, true);
-
             } finally {
+                resetButtonToSendState();
                 showLoading(false);
-                promptInput.disabled = false; // Re-enable prompt input
-                updateSendButtonState(); // Re-enable send button if URL still valid
-                currentAbortController = null; // Clear the controller
-                promptInput.focus();
+                promptInput.disabled = false;
+                currentAbortController = null;
+                updateSendButtonState();
+                updateSessionButtonStates();
+                if (!wasAborted) {
+                   promptInput.focus();
+                }
             }
         }
 
-        // --- Prompt Formatting ---
-        // --->>> MODIFIED FUNCTION <<<---
+        function resetButtonToSendState() {
+             sendButton.removeEventListener('click', handleStopGeneration);
+             sendButton.textContent = 'Send';
+             sendButton.classList.remove('stop-button');
+             sendButton.title = 'Send Message';
+             sendButton.addEventListener('click', handleSendPrompt);
+        }
+
+        // Formats chat history for llama.cpp /completion endpoint, adding character info if present
         function formatChatHistoryForLlama(history) {
             let formattedPrompt = "";
 
-            // NEW: Prepend Character Card instructions if loaded
+            // --- Add Character Card Info as a System Prompt (if available) ---
             if (currentCharacterCard) {
-                // Construct the persona string safely using escapeHtml for content fields
-                let persona = `You are ${escapeHtml(currentCharacterCard.name)}. `;
-                if (currentCharacterCard.age) persona += `Age: ${escapeHtml(String(currentCharacterCard.age))}. `; // Ensure age is string
-                if (currentCharacterCard.gender) persona += `Gender: ${escapeHtml(currentCharacterCard.gender)}. `;
-                if (currentCharacterCard.disposition) persona += `Disposition: ${escapeHtml(currentCharacterCard.disposition)}. `;
-                persona += `Description: ${escapeHtml(currentCharacterCard.description)}\n`;
-                persona += `You must respond and act consistently as ${escapeHtml(currentCharacterCard.name)}, based on this description. Do not break character. Maintain this persona throughout the conversation.\n\n`;
+                // Construct a detailed description string
+                let characterInfo = `You are ${currentCharacterCard.name || 'the character'}. `;
+                characterInfo += `${currentCharacterCard.description || 'No specific description provided.'} `;
+                if (currentCharacterCard.age) characterInfo += `Age: ${currentCharacterCard.age}. `;
+                if (currentCharacterCard.gender) characterInfo += `Gender: ${currentCharacterCard.gender}. `;
+                if (currentCharacterCard.appearance) characterInfo += `Appearance: ${currentCharacterCard.appearance}. `;
+                if (currentCharacterCard.disposition) characterInfo += `Disposition: ${currentCharacterCard.disposition}. `;
+                // Add any other relevant fields from the card here
 
-                // This instruction block is sometimes helpful for models to understand the setup
-                formattedPrompt += `SYSTEM: ${persona}`;
+                // Simple System Prompt format:
+                // formattedPrompt += `SYSTEM: ${characterInfo.trim()}\n\n`;
 
-                // Start the conversation in the character's voice immediately if no history
-                // Or frame the history with User/Character interaction
-                console.log("Using Character Persona Prompt:\n", persona);
-            } else {
-                 console.log("No Character Card loaded, using default prompt format.");
-                 // Optional: Add a default system prompt if needed when no character is loaded
-                 // formattedPrompt += "SYSTEM: You are a helpful AI assistant.\n\n";
+                // Alternative format (might work better with some models/prompts):
+                // Embed it contextually before the first user message
+                formattedPrompt += `[Character Description: ${characterInfo.trim()}]\n\n`;
+
+                 console.log("Formatted Character Prompt Prefix:", formattedPrompt);
             }
+            // --- End Character Card Info ---
 
-            // Append actual chat history, adapting prefixes
+
+            // Append actual chat history
             history.forEach(message => {
-                 if (message.role === 'user') {
-                     // Use a standard instruction format prefix
-                     formattedPrompt += `USER: ${message.content}\n`; // Keep USER prefix standard
-                 } else if (message.role === 'model') {
-                     // Use character name if set, otherwise ASSISTANT
-                     const prefix = currentCharacterCard ? `${escapeHtml(currentCharacterCard.name)}:` : `ASSISTANT:`;
-                     formattedPrompt += `${prefix} ${message.content}\n`;
-                 }
-             });
+                if (message.role === 'user') {
+                    formattedPrompt += `USER: ${message.content}\n`;
+                } else if (message.role === 'model') {
+                    formattedPrompt += `ASSISTANT: ${message.content}\n`;
+                }
+            });
 
-
-            // Prompt for the next turn, using the character's name or ASSISTANT
-            const finalAssistantPrefix = currentCharacterCard ? `${escapeHtml(currentCharacterCard.name)}:` : `ASSISTANT:`;
-            formattedPrompt += finalAssistantPrefix; // Ready for the model's response
-
+            // Add the final prompt for the assistant to start generating
+            formattedPrompt += "ASSISTANT:";
             return formattedPrompt;
         }
 
-        // --- UI Update Functions ---
         function showLoading(isLoading, message = "Processing request...") {
              const currentStatusText = statusDiv.querySelector('span')?.textContent || '';
              const isError = statusDiv.classList.contains('error');
              const isWarning = statusDiv.classList.contains('warning');
+             const isInfo = statusDiv.classList.contains('info');
              const loaderElement = statusDiv.querySelector('.loader');
 
              if (isLoading) {
                  if (!loaderElement) {
                     statusDiv.innerHTML = `<div class="loader"></div><span>${escapeHtml(message)}</span>`;
                     if (isError) statusDiv.classList.add('error');
-                    if (isWarning) statusDiv.classList.add('warning');
+                    else if (isWarning) statusDiv.classList.add('warning');
+                    else if (isInfo) statusDiv.classList.add('info');
+                    else statusDiv.classList.remove('error', 'warning', 'info');
                  } else {
                     const statusSpan = statusDiv.querySelector('span');
                     if(statusSpan) statusSpan.textContent = escapeHtml(message);
                  }
-                 sendButton.disabled = true;
-                 promptInput.disabled = true; // Disable prompt while loading
+                 promptInput.disabled = true;
+                 characterCardInput.disabled = true; // Disable card loading too
+                 updateSessionButtonStates();
              } else {
                  if (loaderElement) loaderElement.remove();
                  const statusSpan = statusDiv.querySelector('span');
-                 // Clear status only if it was a loading message, otherwise keep error/warning/completion messages
-                 if (statusSpan && /Processing|Connecting|Receiving/.test(statusSpan.textContent)) {
-                     statusDiv.innerHTML = ''; // Clear loading message
+                 // Clear temporary loading/processing messages
+                 if (statusSpan && /Processing|Connecting|Receiving|Loading character card/.test(statusSpan.textContent)) {
+                      statusDiv.innerHTML = '';
+                      statusDiv.classList.remove('error', 'warning', 'info');
                  }
-                 promptInput.disabled = false; // Re-enable prompt input
+                 promptInput.disabled = false;
+                 characterCardInput.disabled = false; // Re-enable card loading
                  updateSendButtonState();
+                 updateSessionButtonStates();
              }
          }
 
-        function showStatus(message, isError = false, isWarning = false) {
+        function showStatus(message, isError = false, isWarning = false, isInfo = false, clearNormal = false) {
              const loaderElement = statusDiv.querySelector('.loader');
-             const loaderHtml = loaderElement ? loaderElement.outerHTML : ''; // Preserve loader if still loading
-             statusDiv.classList.remove('error', 'warning');
+             const loaderHtml = loaderElement ? loaderElement.outerHTML : '';
+
+             if (clearNormal && !isError && !isWarning && !isInfo && !loaderHtml) {
+                 statusDiv.innerHTML = '';
+                 statusDiv.classList.remove('error', 'warning', 'info');
+                 return;
+             }
+
+             statusDiv.classList.remove('error', 'warning', 'info');
              statusDiv.innerHTML = `${loaderHtml}<span>${escapeHtml(message)}</span>`;
+
              if (isError) statusDiv.classList.add('error');
              else if (isWarning) statusDiv.classList.add('warning');
+             else if (isInfo) statusDiv.classList.add('info');
          }
 
-        // Function to create a chat bubble DOM element
         function createChatBubbleElement(message) {
             const bubble = document.createElement('div');
             bubble.classList.add('chat-bubble');
-            bubble.dataset.messageId = message.id; // Link bubble to message ID
+            bubble.dataset.messageId = message.id;
 
             if (message.role === 'user') {
                 bubble.classList.add('user-bubble');
-                // Use textContent for user input to prevent accidental HTML injection if needed
                 bubble.textContent = message.content;
             } else if (message.role === 'model') {
                 bubble.classList.add('model-bubble');
-                // Initial content might be empty for streaming
                 bubble.innerHTML = message.content ? marked.parse(message.content) : '';
                 if (message.content) {
-                     // Add code actions after initial render if content exists
                      requestAnimationFrame(() => addCodeActionsToBubble(bubble));
                 }
             }
             return bubble;
         }
 
-        // Renders the full chat history from the `chatHistory` array
         function renderChatHistory() {
-            chatContainer.innerHTML = ''; // Clear existing content
+            chatContainer.innerHTML = '';
             if (chatHistory.length === 0) {
                  updateChatPlaceholder();
+                 updateSendButtonState();
                 return;
             }
 
@@ -969,9 +1186,10 @@
                  chatContainer.appendChild(bubble);
              });
              updateChatPlaceholder();
+             updateSessionButtonStates();
+             updateSendButtonState();
          }
 
-         // Updates the content of a specific model chat bubble
          function updateModelBubbleContent(messageId, newContent, isStreamingUpdate = false) {
              const bubble = chatContainer.querySelector(`.model-bubble[data-message-id="${messageId}"]`);
              if (!bubble) {
@@ -980,30 +1198,18 @@
              }
 
              try {
-                if (isStreamingUpdate) {
-                    // Re-parse on each chunk for better intermediate formatting display
-                    bubble.innerHTML = marked.parse(newContent);
-                    // Re-add actions immediately after parsing (might be slightly less performant but ensures buttons appear)
-                    requestAnimationFrame(() => addCodeActionsToBubble(bubble));
-
-                } else {
-                    // Full render: Parse Markdown and add buttons/highlighting
-                    bubble.innerHTML = marked.parse(newContent || "[Empty Model Response]");
-                    requestAnimationFrame(() => addCodeActionsToBubble(bubble)); // Ensure buttons/highlighting
-                }
+                 bubble.innerHTML = marked.parse(newContent || (isStreamingUpdate ? "" : "[Empty Model Response]"));
+                 addCodeActionsToBubble(bubble);
              } catch (e) {
                  console.error("Markdown parsing/rendering error during update:", e);
-                 bubble.textContent = newContent || "[Error rendering response]"; // Fallback
+                 bubble.textContent = newContent || "[Error rendering response]";
              }
          }
 
-        // Helper to add Copy/Download buttons and apply highlighting
         function addCodeActionsToBubble(bubble) {
             const preBlocks = bubble.querySelectorAll('pre');
             preBlocks.forEach(pre => {
-                // Clean up existing buttons first to prevent duplicates on re-render
-                const existingActions = pre.querySelector('.code-actions');
-                if (existingActions) existingActions.remove();
+                if (pre.querySelector('.code-actions')) return;
 
                 const codeElement = pre.querySelector('code');
                 if (!codeElement) return;
@@ -1011,7 +1217,6 @@
                 const actionsContainer = document.createElement('div');
                 actionsContainer.className = 'code-actions';
 
-                // Copy Button
                 const copyButton = document.createElement('button');
                 copyButton.textContent = 'Copy';
                 copyButton.className = 'code-action-button copy-code-button';
@@ -1019,36 +1224,30 @@
                 copyButton.setAttribute('aria-label', 'Copy code block');
                 actionsContainer.appendChild(copyButton);
 
-                // Download Button
                 const downloadButton = document.createElement('button');
                 downloadButton.textContent = 'Download';
                 downloadButton.className = 'code-action-button download-code-button';
-                downloadButton.title = 'Download code block';
+                downloadButton.title = 'Download code block as file';
                 downloadButton.setAttribute('aria-label', 'Download code block');
                 actionsContainer.appendChild(downloadButton);
 
-                // Add container to pre block
                  if (pre.firstChild) {
                     pre.insertBefore(actionsContainer, pre.firstChild);
                  } else {
                     pre.appendChild(actionsContainer);
                  }
 
-                // Ensure highlighting is applied
                 if (!codeElement.classList.contains('hljs')) {
                    try {
-                     hljs.highlightElement(codeElement);
-                   } catch(e) { console.warn("Highlighting failed for element", codeElement, e); }
-                } else {
-                    // Re-run if already highlighted, sometimes needed after dynamic content changes
-                     try {
-                       hljs.highlightElement(codeElement);
-                     } catch(e) { console.warn("Re-highlighting failed for element", codeElement, e); }
+                      hljs.highlightElement(codeElement);
+                   }
+                   catch(e) {
+                      console.warn("Highlighting failed for element", codeElement, e);
+                   }
                 }
             });
         }
 
-        // Show/Hide the placeholder message
         function updateChatPlaceholder() {
              const placeholder = chatContainer.querySelector('.chat-placeholder');
              if (chatHistory.length === 0 && !placeholder) {
@@ -1058,9 +1257,7 @@
              }
          }
 
-
-        // --- Copy Code Logic ---
-        function handleCopyCodeClick(button) {
+         function handleCopyCodeClick(button) {
              const pre = button.closest('pre');
              const code = pre?.querySelector('code');
              if (!code) return;
@@ -1085,7 +1282,6 @@
              });
          }
 
-        // --- Download Code Logic ---
         function handleDownloadCodeClick(button) {
             const pre = button.closest('pre');
             const code = pre?.querySelector('code');
@@ -1093,69 +1289,61 @@
 
             const codeContent = code.textContent || '';
             let language = 'plaintext';
-            let extension = '.txt'; // Default extension
+            let extension = '.txt';
 
-            // Try to detect language from highlight.js class
-            const langClass = Array.from(code.classList).find(cls => cls.startsWith('language-'));
+            const langClass = Array.from(code.classList).find(cls => cls.startsWith('language-'))
+                           || Array.from(pre.classList).find(cls => cls.startsWith('language-'));
             if (langClass) {
-                language = langClass.replace('language-', '');
+                language = langClass.replace('language-', '').split(' ')[0];
             } else {
-                 // Fallback: check parent pre class if code has no specific class
-                 const preLangClass = Array.from(pre.classList).find(cls => cls.startsWith('language-'));
-                  if (preLangClass) {
-                     language = preLangClass.replace('language-', '');
-                 }
+                // Basic content sniffing (remains the same)
+                if (/^\s*<\!DOCTYPE html>|<html.*>/i.test(codeContent.substring(0,100))) language = 'html';
+                else if (/^\s*\{.*\}\s*$/.test(codeContent) || /^\s*\[.*\]\s*$/.test(codeContent)) language = 'json';
+                else if (codeContent.includes('def ') && codeContent.includes(':')) language = 'python';
+                else if (codeContent.includes('function') && (codeContent.includes('{') || codeContent.includes('=>'))) language = 'javascript';
+                else if (codeContent.includes('public class') || codeContent.includes('import java')) language = 'java';
+                else if (codeContent.includes('#include') && codeContent.includes('main(')) language = 'cpp';
+                else if (codeContent.includes('<?php')) language = 'php';
+                else if (codeContent.includes('FROM ') && codeContent.includes('RUN ')) language = 'dockerfile';
+                else if (/^\s*---/.test(codeContent)) language = 'yaml';
+                 else if (/^\s*SELECT .* FROM /i.test(codeContent)) language = 'sql';
             }
 
-            // Simple mapping for common languages
             const extensionMap = {
-                python: '.py', javascript: '.js', js: '.js', typescript: '.ts', ts: '.ts',
-                html: '.html', css: '.css', json: '.json', xml: '.xml', yaml: '.yaml',
-                markdown: '.md', md: '.md', shell: '.sh', bash: '.sh', zsh: '.zsh',
-                java: '.java', c: '.c', cpp: '.cpp', csharp: '.cs', go: '.go', ruby: '.rb',
-                php: '.php', rust: '.rs', sql: '.sql', dockerfile: 'Dockerfile', ini: '.ini',
-                toml: '.toml', plaintext: '.txt', text: '.txt'
-                // Add more mappings as needed
+                python: '.py', py: '.py', javascript: '.js', js: '.js', typescript: '.ts', ts: '.ts',
+                html: '.html', htm: '.html', css: '.css', json: '.json', xml: '.xml', yaml: '.yaml', yml: '.yaml',
+                markdown: '.md', md: '.md', shell: '.sh', bash: '.sh', zsh: '.zsh', sh: '.sh', java: '.java',
+                c: '.c', cpp: '.cpp', cxx: '.cpp', 'c++': '.cpp', csharp: '.cs', cs: '.cs', go: '.go',
+                ruby: '.rb', rb: '.rb', php: '.php', rust: '.rs', rs: '.rs', sql: '.sql',
+                dockerfile: 'Dockerfile', ini: '.ini', toml: '.toml', plaintext: '.txt', text: '.txt', txt: '.txt',
             };
             extension = extensionMap[language.toLowerCase()] || extension;
+            const filename = `code-${language}${extension === 'Dockerfile' ? '' : extension}`;
 
-            // Determine filename
-            const filename = `code-${language}${extension}`;
-
-            // Create Blob and trigger download
             try {
-                const blob = new Blob([codeContent], { type: 'application/octet-stream' }); // Use octet-stream for generic download
+                const blob = new Blob([codeContent], { type: 'application/octet-stream' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
                 a.download = filename;
-                document.body.appendChild(a); // Required for Firefox
+                document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
-                URL.revokeObjectURL(url); // Clean up
+                URL.revokeObjectURL(url);
 
-                // Optional: Visual feedback on the button
                 button.textContent = 'Downloaded';
                 button.disabled = true;
-                 setTimeout(() => {
-                    button.textContent = 'Download';
-                    button.disabled = false;
-                }, 2000);
-
+                 setTimeout(() => { button.textContent = 'Download'; button.disabled = false; }, 2000);
             } catch (err) {
                 console.error('Failed to create download: ', err);
                  button.textContent = 'Error';
                  button.disabled = true;
-                  setTimeout(() => {
-                    button.textContent = 'Download';
-                    button.disabled = false;
-                 }, 2000);
+                  setTimeout(() => { button.textContent = 'Download'; button.disabled = false; }, 2000);
             }
         }
 
 
-         // --- Utility Functions ---
-         function escapeHtml(unsafe) {
+        function escapeHtml(unsafe) {
              if (typeof unsafe !== 'string') return '';
              return unsafe
                   .replace(/&/g, "&amp;")
@@ -1167,39 +1355,316 @@
 
         function scrollToBottom() {
             requestAnimationFrame(() => {
-                // Only scroll if the user isn't currently scrolled up significantly
-                const isScrolledUp = responseArea.scrollHeight - responseArea.scrollTop - responseArea.clientHeight > 100;
-                if (!isScrolledUp) {
+                const isNearBottom = responseArea.scrollHeight - responseArea.scrollTop - responseArea.clientHeight < 250;
+                 if (isNearBottom) {
                      responseArea.scrollTop = responseArea.scrollHeight;
-                }
+                 }
             });
         }
 
-        function clearAll() {
-            if (currentAbortController) {
-                currentAbortController.abort(); // Cancel ongoing request if clearing
+        // --- Session Management (Updated for Character Card) ---
+
+        function getSessionIndex() {
+            try {
+                const indexJson = localStorage.getItem(SESSION_INDEX_KEY);
+                if (!indexJson) return [];
+                const index = JSON.parse(indexJson);
+                return Array.isArray(index) ? index.filter(s => s && s.id && s.name) : [];
+            } catch (e) {
+                console.error("Error reading session index:", e);
+                localStorage.removeItem(SESSION_INDEX_KEY);
+                return [];
+            }
+        }
+
+        function saveSessionIndex(index) {
+            try {
+                 const validIndex = index.filter(s => s && s.id && s.name);
+                 validIndex.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+                localStorage.setItem(SESSION_INDEX_KEY, JSON.stringify(validIndex));
+            } catch (e) {
+                console.error("Error saving session index:", e);
+                showStatus("Error: Failed to save session index. Local Storage might be full.", true);
+            }
+        }
+
+        function populateSessionDropdown() {
+            const sessions = getSessionIndex();
+            sessionSelect.innerHTML = '';
+
+            const newOption = document.createElement('option');
+            newOption.value = "";
+            newOption.textContent = "--- New Chat ---";
+            sessionSelect.appendChild(newOption);
+
+            sessions.forEach(session => {
+                 const option = document.createElement('option');
+                 option.value = session.id;
+                 option.textContent = session.name;
+                 sessionSelect.appendChild(option);
+            });
+
+            sessionSelect.value = currentSessionId || "";
+            updateSessionButtonStates();
+        }
+
+        function startNewSession() {
+             if (currentAbortController) {
+                currentAbortController.abort();
                 currentAbortController = null;
             }
             promptInput.value = '';
             chatHistory = [];
-            // By default, keep character card when clearing chat
-            // To clear character card too, uncomment these lines:
-            // currentCharacterCard = null;
-            // updateCharacterDisplay();
-            // characterCardFileInput.value = null;
-
+            currentSessionId = null;
+            messageCounter = 0;
+            currentCharacterCard = null; // Clear character card
+            displayCharacterCardInfo(); // Update UI for character card
+            // REMOVED clearStagedFiles();
             renderChatHistory();
-            showStatus(""); // Clear status
-            promptInput.disabled = false; // Ensure input is enabled
-            updateSendButtonState(); // Update button state
+            showStatus("", false, false, false, true);
+            sessionSelect.value = "";
+            updateSessionButtonStates();
+            promptInput.disabled = false;
+            characterCardInput.disabled = false; // Ensure card loading is enabled
+            resetButtonToSendState();
+            updateSendButtonState();
             promptInput.focus();
         }
 
-        // --- Run Initialization ---
+        function handleSaveSession() {
+             const isLoading = statusDiv.querySelector('.loader') !== null;
+             // Can save if chat is not empty OR a character card is loaded
+            if (chatHistory.length === 0 && !currentCharacterCard || isLoading) {
+                showStatus("Cannot save an empty chat (unless a character card is loaded) or while loading.", false, true);
+                return;
+            }
+
+            const sessions = getSessionIndex();
+            let defaultName = `Chat ${new Date().toLocaleString()}`;
+            if (currentCharacterCard?.name) {
+                defaultName = `${currentCharacterCard.name} Chat ${new Date().toLocaleTimeString()}`;
+            }
+            let existingSession = null;
+
+            if (currentSessionId) {
+                existingSession = sessions.find(s => s.id === currentSessionId);
+                if (existingSession) {
+                    defaultName = existingSession.name;
+                }
+            }
+
+            const sessionName = prompt("Enter a name for this session:", defaultName);
+
+            if (sessionName === null) {
+                showStatus("Save cancelled.", false, false, true);
+                return;
+            }
+
+            const trimmedName = sessionName.trim();
+            if (!trimmedName) {
+                 showStatus("Session name cannot be empty.", true);
+                 return;
+             }
+
+             const nameExists = sessions.some(s => s.name === trimmedName && s.id !== currentSessionId);
+             if (nameExists) {
+                 const conflictingSession = sessions.find(s => s.name === trimmedName);
+                 if (!confirm(`A session named "${trimmedName}" already exists. Overwrite it?`)) {
+                     showStatus("Save cancelled.", false, false, true);
+                     return;
+                 }
+                 if (conflictingSession) {
+                     try { localStorage.removeItem(`${SESSION_DATA_PREFIX}${conflictingSession.id}`); }
+                     catch (e) { console.error(`Error removing conflicting session data ${conflictingSession.id}:`, e); }
+                     const conflictIndex = sessions.findIndex(s => s.id === conflictingSession.id);
+                     if (conflictIndex > -1) sessions.splice(conflictIndex, 1);
+                 }
+             }
+
+            try {
+                // --- Create session object including character card ---
+                const sessionData = {
+                    history: chatHistory,
+                    character: currentCharacterCard // Save the current character card (or null)
+                };
+                const sessionJson = JSON.stringify(sessionData);
+                // --- End create session object ---
+
+                let sessionIdToSave = currentSessionId;
+
+                if (existingSession) {
+                    if (existingSession.name !== trimmedName) {
+                        existingSession.name = trimmedName;
+                    }
+                    existingSession.timestamp = Date.now();
+                    console.log(`Updating session: ${sessionIdToSave}`);
+                } else {
+                    sessionIdToSave = `${SESSION_DATA_PREFIX}${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+                    sessions.push({ id: sessionIdToSave, name: trimmedName, timestamp: Date.now() });
+                    currentSessionId = sessionIdToSave;
+                    console.log(`Creating new session: ${sessionIdToSave}`);
+                }
+
+                localStorage.setItem(`${SESSION_DATA_PREFIX}${sessionIdToSave}`, sessionJson); // Save the combined object
+                saveSessionIndex(sessions);
+                populateSessionDropdown();
+                sessionSelect.value = sessionIdToSave;
+                showStatus(`Session "${trimmedName}" saved successfully.`, false, false, true);
+                updateSessionButtonStates();
+
+            } catch (e) {
+                 console.error("Error saving session data:", e);
+                 if (e.name === 'QuotaExceededError' || (e.message && e.message.toLowerCase().includes('quota'))) {
+                    showStatus("Error: Failed to save session. Local Storage is full. Please delete older sessions.", true);
+                 } else {
+                    showStatus("Error: Failed to save session data.", true);
+                 }
+            }
+        }
+
+        function handleLoadSession() {
+            const selectedId = sessionSelect.value;
+
+            if (!selectedId) {
+                 const hasUnsavedChanges = (chatHistory.length > 0 || currentCharacterCard !== null) && currentSessionId === null;
+                 if (hasUnsavedChanges) {
+                     if (!confirm("You have an unsaved chat or character card. Start a new chat anyway? Changes will be lost.")) {
+                         sessionSelect.value = currentSessionId || "";
+                         return;
+                     }
+                 }
+                startNewSession();
+                return;
+            }
+
+             if (selectedId === currentSessionId) return;
+
+             const hasUnsavedChanges = (chatHistory.length > 0 || currentCharacterCard !== null) && currentSessionId === null;
+             if (hasUnsavedChanges) {
+                 if (!confirm("You have an unsaved chat or character card. Load selected session anyway? Changes will be lost.")) {
+                     sessionSelect.value = currentSessionId || "";
+                     return;
+                 }
+             }
+
+            try {
+                const sessionJson = localStorage.getItem(`${SESSION_DATA_PREFIX}${selectedId}`);
+                if (!sessionJson) {
+                    throw new Error(`Session data not found for ID: ${selectedId}.`);
+                }
+                const loadedSessionData = JSON.parse(sessionJson);
+
+                 // --- Validate and extract loaded data ---
+                 if (!loadedSessionData || typeof loadedSessionData !== 'object') {
+                     throw new Error(`Invalid session data format for ID: ${selectedId}. Expected an object.`);
+                 }
+                 const loadedHistory = loadedSessionData.history;
+                 const loadedCharacter = loadedSessionData.character; // Can be null
+
+                 if (!Array.isArray(loadedHistory)) {
+                    throw new Error(`Invalid chat history format within session ID: ${selectedId}.`);
+                 }
+                 // Basic check for character structure if it exists
+                 if (loadedCharacter !== null && (typeof loadedCharacter !== 'object' || !loadedCharacter.name || !loadedCharacter.description || !loadedCharacter.photo)) {
+                    console.warn(`Loaded session ${selectedId} has an invalid character card structure. Ignoring character.`);
+                    currentCharacterCard = null;
+                 } else {
+                     currentCharacterCard = loadedCharacter; // Load character (or null)
+                 }
+                 // --- End validation ---
+
+
+                if (currentAbortController) {
+                    currentAbortController.abort();
+                    currentAbortController = null;
+                }
+
+                chatHistory = loadedHistory;
+                currentSessionId = selectedId;
+                displayCharacterCardInfo(); // Display loaded character info (or hide if null)
+                // REMOVED clearStagedFiles();
+
+                let maxIdNum = -1;
+                chatHistory.forEach(msg => {
+                    if (msg && msg.id && msg.id.startsWith('msg-')) {
+                        const numPart = parseInt(msg.id.substring(4), 10);
+                        if (!isNaN(numPart) && numPart > maxIdNum) maxIdNum = numPart;
+                    }
+                });
+                messageCounter = maxIdNum + 1;
+                console.log(`Message counter reset to ${messageCounter} after loading session '${selectedId}'.`);
+
+                renderChatHistory();
+                showStatus(`Session "${sessionSelect.options[sessionSelect.selectedIndex].text}" loaded.`, false, false, true);
+                updateSessionButtonStates();
+                resetButtonToSendState();
+                updateSendButtonState();
+                scrollToBottom();
+
+            } catch (e) {
+                console.error("Error loading session:", e);
+                showStatus(`Error: Failed to load session. ${e.message}`, true);
+                 localStorage.removeItem(`${SESSION_DATA_PREFIX}${selectedId}`);
+                 const sessions = getSessionIndex().filter(s => s.id !== selectedId);
+                 saveSessionIndex(sessions);
+                 startNewSession();
+                 populateSessionDropdown();
+            }
+        }
+
+        function handleDeleteSession() {
+            const selectedId = sessionSelect.value;
+             const isLoading = statusDiv.querySelector('.loader') !== null;
+
+            if (!selectedId || isLoading) {
+                showStatus("Select a session to delete first (cannot delete while loading).", false, true);
+                return;
+            }
+
+            const sessionName = sessionSelect.options[sessionSelect.selectedIndex].text;
+            if (!confirm(`Are you sure you want to delete the session "${sessionName}"? This cannot be undone.`)) {
+                showStatus("Deletion cancelled.", false, false, true);
+                return;
+            }
+
+            try {
+                localStorage.removeItem(`${SESSION_DATA_PREFIX}${selectedId}`);
+                const sessions = getSessionIndex();
+                const updatedSessions = sessions.filter(s => s.id !== selectedId);
+                saveSessionIndex(updatedSessions);
+
+                showStatus(`Session "${sessionName}" deleted.`, false, false, true);
+
+                if (currentSessionId === selectedId) {
+                    startNewSession();
+                } else {
+                     populateSessionDropdown();
+                     updateSessionButtonStates();
+                }
+
+            } catch (e) {
+                console.error("Error deleting session:", e);
+                showStatus("Error: Failed to delete session.", true);
+            }
+        }
+
+        function updateSessionButtonStates() {
+             const isLoading = statusDiv.querySelector('.loader') !== null || currentAbortController !== null;
+
+             // Can save if not loading AND (chat has messages OR a character card is loaded)
+             const canSave = !isLoading && (chatHistory.length > 0 || currentCharacterCard !== null);
+             const isSessionSelected = sessionSelect.value !== "";
+
+             saveSessionButton.disabled = !canSave;
+             deleteSessionButton.disabled = isLoading || !isSessionSelected;
+             sessionSelect.disabled = isLoading;
+             characterCardInput.disabled = isLoading; // Disable character loading during requests
+             clearCharacterButton.disabled = isLoading || !currentCharacterCard; // Disable clear if no card or loading
+        }
+
+        // --- Initialize Application ---
         initialize();
 
     </script>
 </body>
 </html>
-
---- END OF FILE llama.html ---

@@ -3,80 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Character Card Creator</title>
+    <title>LlamaHTML Character Card Generator</title>
     <style>
-        /* Basic Reset & Root Variables (Adapted from LlamaHTML for consistency) */
         :root {
             --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            --transition-speed: 0.3s ease;
-            /* Simple Light Theme */
-            --bg-color: #f8f9fa;
-            --text-color: #212529;
+            --bg-color: #f4f7f9;
+            --text-color: #333;
             --primary-color: #007bff;
             --primary-color-rgb: 0, 123, 255;
             --secondary-color: #6c757d;
             --card-bg: #ffffff;
             --input-bg: #ffffff;
             --input-border: #ced4da;
-            --button-bg: #007bff;
+            --button-bg: var(--primary-color);
             --button-text: #ffffff;
             --button-hover-bg: #0056b3;
+            --button-secondary-bg: var(--secondary-color);
+            --button-secondary-hover-bg: #5a6268;
+            --button-success-bg: #28a745;
+            --button-success-hover-bg: #218838;
             --error-color: #dc3545;
-            --success-color: #28a745;
             --code-bg: #e9ecef;
             --border-color: #dee2e6;
             --shadow-color: rgba(0, 0, 0, 0.1);
         }
 
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             font-family: var(--font-family);
             background-color: var(--bg-color);
             color: var(--text-color);
             line-height: 1.6;
             padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start; /* Align top */
-            min-height: 100vh;
         }
+
         .container {
             max-width: 700px;
-            width: 100%;
-            margin: 20px;
+            margin: 20px auto;
             padding: 30px;
             background-color: var(--card-bg);
             border-radius: 12px;
             box-shadow: 0 5px 15px var(--shadow-color);
         }
+
+        header {
+            margin-bottom: 25px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
         h1 {
             color: var(--primary-color);
             font-size: 1.8em;
-            margin-bottom: 10px;
             text-align: center;
         }
-        p.description {
-            text-align: center;
-            color: var(--secondary-color);
-            margin-bottom: 25px;
+        h2 {
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+            color: var(--text-color);
+            padding-bottom: 5px;
+            border-bottom: 1px solid var(--border-color);
         }
 
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr; /* Single column layout */
-            gap: 15px;
+        .form-group {
+            margin-bottom: 20px;
         }
 
-        .input-group { margin-bottom: 5px; } /* Reduced margin */
-        .input-group label {
+        .form-group label {
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
             color: var(--secondary-color);
         }
-        .input-group label .required-star { color: var(--error-color); margin-left: 2px; }
-        .input-group input[type="text"],
-        .input-group textarea {
+         .form-group label .required {
+            color: var(--error-color);
+            font-weight: bold;
+            margin-left: 3px;
+         }
+         .form-group label .optional {
+             color: var(--secondary-color);
+             font-weight: normal;
+             font-size: 0.9em;
+             margin-left: 5px;
+         }
+
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group input[type="url"],
+        .form-group textarea {
             width: 100%;
             padding: 12px 15px;
             border: 1px solid var(--input-border);
@@ -84,260 +104,307 @@
             font-size: 1rem;
             background-color: var(--input-bg);
             color: var(--text-color);
-            transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
-        .input-group input:focus,
-        .input-group textarea:focus {
+
+        .form-group input:focus,
+        .form-group textarea:focus {
             outline: none;
             border-color: var(--primary-color);
             box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.25);
         }
-        .input-group textarea { resize: vertical; min-height: 100px; }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
 
         .button-group {
             display: flex;
             gap: 10px;
             margin-top: 25px;
-            flex-wrap: wrap; /* Allow buttons to wrap on small screens */
+            flex-wrap: wrap;
         }
+
         button {
-            padding: 12px 20px;
-            background-color: var(--button-bg);
+            padding: 10px 18px;
             color: var(--button-text);
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 600;
-            transition: background-color var(--transition-speed), transform 0.1s ease;
-            flex-grow: 1; /* Allow buttons to share space */
+            transition: background-color 0.3s ease, transform 0.1s ease;
         }
-        button:hover:not(:disabled) { background-color: var(--button-hover-bg); transform: translateY(-1px); }
-        button:active:not(:disabled) { transform: translateY(0px); }
-        button:disabled { background-color: var(--secondary-color); cursor: not-allowed; opacity: 0.7; }
-
-        #clearButton { background-color: var(--secondary-color); }
-        #clearButton:hover:not(:disabled) { background-color: #5a6268; }
-
-        #status {
-            margin-top: 20px;
-            font-weight: bold;
-            min-height: 1.6em;
-            padding: 10px;
-            border-radius: 6px;
-            text-align: center;
+        button:hover:not(:disabled) {
+            transform: translateY(-1px);
         }
-        #status.error { color: var(--error-color); background-color: rgba(220, 53, 69, 0.1); }
-        #status.success { color: var(--success-color); background-color: rgba(40, 167, 69, 0.1); }
-
-        .preview-area { margin-top: 20px; }
-        .preview-area h2 {
-            font-size: 1.2em;
-            color: var(--secondary-color);
-            margin-bottom: 10px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 5px;
+        button:active:not(:disabled) {
+            transform: translateY(0px);
         }
-        #jsonPreview {
-            background-color: var(--code-bg);
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        #generateButton { background-color: var(--button-bg); }
+        #generateButton:hover:not(:disabled) { background-color: var(--button-hover-bg); }
+
+        #copyButton { background-color: var(--button-secondary-bg); }
+        #copyButton:hover:not(:disabled) { background-color: var(--button-secondary-hover-bg); }
+        #copyButton.copied { background-color: var(--button-success-bg); }
+
+        #downloadButton { background-color: var(--button-success-bg); }
+        #downloadButton:hover:not(:disabled) { background-color: var(--button-success-hover-bg); }
+
+        #jsonOutput {
+            width: 100%;
+            min-height: 200px;
+            margin-top: 10px;
+            padding: 15px;
             border: 1px solid var(--border-color);
             border-radius: 6px;
-            padding: 15px;
             font-family: 'Courier New', Courier, monospace;
             font-size: 0.9em;
-            white-space: pre-wrap; /* Allow wrapping */
-            word-wrap: break-word;
-            max-height: 300px; /* Limit height */
-            overflow-y: auto; /* Add scroll if needed */
+            background-color: var(--code-bg);
             color: var(--text-color);
+            white-space: pre;
+            overflow-x: auto;
+            resize: vertical;
         }
-        #jsonPreview:empty::before {
-            content: "JSON preview will appear here...";
+
+        .error-message {
+            color: var(--error-color);
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
             color: var(--secondary-color);
-            font-style: italic;
+            font-size: 0.9em;
         }
     </style>
 </head>
 <body>
+
     <div class="container">
-        <h1>Character Card Creator</h1>
-        <p class="description">Fill in the details below to generate a JSON character card file compatible with LlamaHTML.</p>
+        <header>
+            <h1>LlamaHTML Character Card Generator</h1>
+        </header>
+
+        <p style="margin-bottom: 20px; color: var(--secondary-color);">
+            Fill out the form below to generate a JSON character card compatible with LlamaHTML.
+            Fields marked with <span class="required">*</span> are required.
+        </p>
 
         <form id="characterForm">
-            <div class="form-grid">
-                <div class="input-group">
-                    <label for="charName">Name <span class="required-star">*</span></label>
-                    <input type="text" id="charName" name="charName" required placeholder="e.g., Captain Redbeard">
-                </div>
+            <div class="form-group">
+                <label for="name">Name<span class="required">*</span></label>
+                <input type="text" id="name" name="name" placeholder="Character's full name" required>
+                 <div class="error-message" id="nameError"></div>
+            </div>
 
-                <div class="input-group">
-                    <label for="charAge">Age</label>
-                    <input type="text" id="charAge" name="charAge" placeholder="e.g., 45, Ageless, Ancient">
-                </div>
+            <div class="form-group">
+                <label for="description">Description<span class="required">*</span></label>
+                <textarea id="description" name="description" placeholder="A brief summary or core description of the character." required></textarea>
+                 <div class="error-message" id="descriptionError"></div>
+            </div>
 
-                <div class="input-group">
-                    <label for="charGender">Gender</label>
-                    <input type="text" id="charGender" name="charGender" placeholder="e.g., Male, Female, Non-binary">
-                </div>
+            <div class="form-group">
+                <label for="photo">Photo URL<span class="required">*</span></label>
+                <input type="url" id="photo" name="photo" placeholder="https://example.com/character_image.jpg" required>
+                 <div class="error-message" id="photoError"></div>
+            </div>
 
-                <div class="input-group">
-                    <label for="charDisposition">Disposition</label>
-                    <textarea id="charDisposition" name="charDisposition" rows="3" placeholder="Briefly describe their general mood or attitude (e.g., Gruff but fair, Cheerful and optimistic)"></textarea>
-                </div>
+            <div class="form-group">
+                <label for="age">Age <span class="optional">(Optional)</span></label>
+                <input type="number" id="age" name="age" placeholder="e.g., 35" min="0">
+            </div>
 
-                <div class="input-group">
-                    <label for="charDescription">Description <span class="required-star">*</span></label>
-                    <textarea id="charDescription" name="charDescription" rows="5" required placeholder="Detailed description of the character's appearance, personality, speaking style, background, goals, etc. This is the most important field for the LLM."></textarea>
-                </div>
+            <div class="form-group">
+                <label for="gender">Gender <span class="optional">(Optional)</span></label>
+                <input type="text" id="gender" name="gender" placeholder="e.g., Male, Female, Non-binary">
+            </div>
+
+            <div class="form-group">
+                <label for="appearance">Appearance <span class="optional">(Optional)</span></label>
+                <textarea id="appearance" name="appearance" placeholder="Describe the character's physical appearance (hair color, build, clothing style, etc.)."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="disposition">Disposition <span class="optional">(Optional)</span></label>
+                <textarea id="disposition" name="disposition" placeholder="Describe the character's typical mood, temperament, or personality traits (e.g., cheerful, grumpy, curious)."></textarea>
             </div>
 
             <div class="button-group">
-                <button type="button" id="generateButton">Generate & Download JSON</button>
-                <button type="button" id="previewButton">Preview JSON</button>
-                <button type="button" id="clearButton">Clear Fields</button>
+                <button type="submit" id="generateButton">Generate JSON</button>
             </div>
         </form>
 
-        <div id="status"></div>
-
-        <div class="preview-area">
-            <h2>JSON Preview</h2>
-            <pre><code id="jsonPreview"></code></pre>
+        <div id="outputArea" style="display: none;">
+            <h2>Generated JSON</h2>
+            <textarea id="jsonOutput" readonly></textarea>
+            <div class="button-group">
+                <button type="button" id="copyButton">Copy JSON</button>
+                <button type="button" id="downloadButton">Download .json File</button>
+            </div>
         </div>
 
     </div>
 
+    <footer>
+        Created for use with LlamaHTML. Ensure the Photo URL is accessible.
+    </footer>
+
     <script>
-        // Get DOM Elements
         const form = document.getElementById('characterForm');
-        const charNameInput = document.getElementById('charName');
-        const charAgeInput = document.getElementById('charAge');
-        const charGenderInput = document.getElementById('charGender');
-        const charDispositionInput = document.getElementById('charDisposition');
-        const charDescriptionInput = document.getElementById('charDescription');
-        const generateButton = document.getElementById('generateButton');
-        const previewButton = document.getElementById('previewButton');
-        const clearButton = document.getElementById('clearButton');
-        const statusDiv = document.getElementById('status');
-        const jsonPreview = document.getElementById('jsonPreview');
+        const nameInput = document.getElementById('name');
+        const descriptionInput = document.getElementById('description');
+        const photoInput = document.getElementById('photo');
+        const ageInput = document.getElementById('age');
+        const genderInput = document.getElementById('gender');
+        const appearanceInput = document.getElementById('appearance');
+        const dispositionInput = document.getElementById('disposition');
 
-        // --- Helper Functions ---
-        function showStatus(message, isError = false) {
-            statusDiv.textContent = message;
-            statusDiv.className = isError ? 'error' : 'success'; // Use class for styling
-            if (!message) {
-                statusDiv.className = ''; // Clear class if no message
-                statusDiv.style.backgroundColor = 'transparent'; // Explicitly clear background if needed
+        const outputArea = document.getElementById('outputArea');
+        const jsonOutput = document.getElementById('jsonOutput');
+        const copyButton = document.getElementById('copyButton');
+        const downloadButton = document.getElementById('downloadButton');
+
+        const nameError = document.getElementById('nameError');
+        const descriptionError = document.getElementById('descriptionError');
+        const photoError = document.getElementById('photoError');
+
+        form.addEventListener('submit', (event) => {
+            event.preventDefault(); // Prevent default form submission
+
+            // Clear previous errors
+            nameError.textContent = '';
+            descriptionError.textContent = '';
+            photoError.textContent = '';
+            let isValid = true;
+
+            // --- Validation ---
+            const nameValue = nameInput.value.trim();
+            const descriptionValue = descriptionInput.value.trim();
+            const photoValue = photoInput.value.trim();
+
+            if (!nameValue) {
+                nameError.textContent = 'Name is required.';
+                isValid = false;
+            }
+            if (!descriptionValue) {
+                descriptionError.textContent = 'Description is required.';
+                isValid = false;
+            }
+            if (!photoValue) {
+                photoError.textContent = 'Photo URL is required.';
+                isValid = false;
             } else {
-                 statusDiv.style.backgroundColor = isError ? 'rgba(220, 53, 69, 0.1)' : 'rgba(40, 167, 69, 0.1)';
-            }
-        }
-
-        function generateJsonData() {
-            const name = charNameInput.value.trim();
-            const description = charDescriptionInput.value.trim();
-            const age = charAgeInput.value.trim();
-            const gender = charGenderInput.value.trim();
-            const disposition = charDispositionInput.value.trim();
-
-            // Basic Validation
-            if (!name || !description) {
-                showStatus('Error: Name and Description fields are required.', true);
-                if (!name) charNameInput.focus();
-                else charDescriptionInput.focus();
-                return null; // Indicate failure
+                // Simple URL validation
+                try {
+                    new URL(photoValue); // Check if it's a valid URL format
+                } catch (_) {
+                    photoError.textContent = 'Please enter a valid URL (e.g., https://...).';
+                    isValid = false;
+                }
             }
 
-            // Create character data object
-            const cardData = {
-                name: name,
-                // Only include optional fields if they have content
-                ...(age && { age: age }),
-                ...(gender && { gender: gender }),
-                ...(disposition && { disposition: disposition }),
-                description: description,
+            if (!isValid) {
+                outputArea.style.display = 'none'; // Hide output if validation fails
+                return; // Stop processing if validation fails
+            }
+
+            // --- Data Gathering & JSON Creation ---
+            const characterCard = {
+                name: nameValue,
+                description: descriptionValue,
+                photo: photoValue,
             };
 
-            return cardData;
-        }
+            const ageValue = ageInput.value.trim();
+            const genderValue = genderInput.value.trim();
+            const appearanceValue = appearanceInput.value.trim();
+            const dispositionValue = dispositionInput.value.trim();
 
-        function sanitizeFilename(name) {
-            // Remove characters not suitable for filenames and replace spaces
-            return name.replace(/[^a-z0-9_\-\s]/gi, '').replace(/\s+/g, '_').toLowerCase() || 'character_card';
-        }
-
-        // --- Event Handlers ---
-        function handleGenerateAndDownload() {
-            const cardData = generateJsonData();
-            if (!cardData) return; // Validation failed
-
-            try {
-                const jsonString = JSON.stringify(cardData, null, 2); // Pretty print JSON
-                jsonPreview.textContent = jsonString; // Show in preview
-
-                // Create Blob
-                const blob = new Blob([jsonString], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-
-                // Create download link
-                const a = document.createElement('a');
-                a.href = url;
-                const filename = `${sanitizeFilename(cardData.name)}.json`;
-                a.download = filename;
-
-                // Trigger download
-                document.body.appendChild(a); // Required for Firefox
-                a.click();
-                document.body.removeChild(a);
-
-                // Clean up
-                URL.revokeObjectURL(url);
-
-                showStatus(`Successfully generated and downloaded ${filename}`, false);
-
-            } catch (error) {
-                console.error('Error generating or downloading JSON:', error);
-                showStatus('Error generating or downloading JSON. Check console for details.', true);
-                jsonPreview.textContent = ''; // Clear preview on error
+            if (ageValue) {
+                // Ensure age is a number, default to null if not valid number (or keep as string if desired)
+                const ageNum = parseInt(ageValue, 10);
+                if (!isNaN(ageNum) && ageNum >= 0) {
+                    characterCard.age = ageNum;
+                } else {
+                     console.warn(`Invalid age input "${ageValue}", omitting from JSON.`);
+                     // Optionally, you could add an error message here too.
+                }
             }
-        }
-
-        function handlePreviewJson() {
-             const cardData = generateJsonData();
-             if (!cardData) {
-                 jsonPreview.textContent = ''; // Clear preview if validation fails
-                 return;
-             }
-
-            try {
-                const jsonString = JSON.stringify(cardData, null, 2);
-                jsonPreview.textContent = jsonString;
-                showStatus('JSON preview updated.', false);
-            } catch (error) {
-                console.error('Error generating JSON preview:', error);
-                showStatus('Error generating JSON preview. Check console for details.', true);
-                jsonPreview.textContent = ''; // Clear preview on error
+            if (genderValue) {
+                characterCard.gender = genderValue;
             }
-        }
+            if (appearanceValue) {
+                characterCard.appearance = appearanceValue;
+            }
+            if (dispositionValue) {
+                characterCard.disposition = dispositionValue;
+            }
 
-        function handleClearFields() {
-            form.reset(); // Resets all form fields
-            jsonPreview.textContent = '';
-            showStatus(''); // Clear status message
-        }
+            // --- Output JSON ---
+            const jsonString = JSON.stringify(characterCard, null, 2); // Pretty print with 2 spaces
+            jsonOutput.value = jsonString;
+            outputArea.style.display = 'block'; // Show the output area
 
-        // --- Attach Event Listeners ---
-        generateButton.addEventListener('click', handleGenerateAndDownload);
-        previewButton.addEventListener('click', handlePreviewJson);
-        clearButton.addEventListener('click', handleClearFields);
+            // Reset copy button state
+            copyButton.textContent = 'Copy JSON';
+            copyButton.classList.remove('copied');
+            copyButton.disabled = false;
+            downloadButton.disabled = false;
+        });
 
-        // Optional: Preview JSON automatically when fields change (debounced)
-        let previewDebounceTimer;
-        form.addEventListener('input', () => {
-            clearTimeout(previewDebounceTimer);
-            previewDebounceTimer = setTimeout(handlePreviewJson, 500); // Debounce preview update
+        copyButton.addEventListener('click', () => {
+            if (!jsonOutput.value) return;
+
+            navigator.clipboard.writeText(jsonOutput.value)
+                .then(() => {
+                    copyButton.textContent = 'Copied!';
+                    copyButton.classList.add('copied');
+                    copyButton.disabled = true;
+                    setTimeout(() => {
+                        copyButton.textContent = 'Copy JSON';
+                        copyButton.classList.remove('copied');
+                        copyButton.disabled = false;
+                    }, 2000); // Reset after 2 seconds
+                })
+                .catch(err => {
+                    console.error('Failed to copy JSON: ', err);
+                    alert('Failed to copy JSON. Please copy manually.');
+                });
+        });
+
+        downloadButton.addEventListener('click', () => {
+            if (!jsonOutput.value) return;
+
+            const characterName = nameInput.value.trim().toLowerCase().replace(/\s+/g, '-') || 'character';
+            // Basic sanitization for filename
+            const filename = `${characterName.replace(/[^a-z0-9-]/g, '')}.json`;
+
+            const blob = new Blob([jsonOutput.value], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a); // Append needed for Firefox
+            a.click();
+
+            // Clean up
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         });
 
     </script>
+
 </body>
 </html>
